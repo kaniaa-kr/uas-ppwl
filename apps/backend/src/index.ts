@@ -1,12 +1,23 @@
+import "dotenv/config"
 import { Elysia } from "elysia"
 import { cors } from "@elysiajs/cors"
 import { PrismaClient } from "@prisma/client"
+import { Pool } from "pg"
+import { PrismaPg } from "@prisma/adapter-pg"
 import { authRoutes } from "./routes/auth"
 import { postRoutes } from "./routes/posts"
 import { commentRoutes } from "./routes/comments"
 import { notifRoutes } from "./routes/notifications"
 
-export const prisma = new PrismaClient()
+// Setup Prisma dengan Adapter PostgreSQL (wajib untuk Prisma v7)
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  throw new Error("DATABASE_URL tidak ditemukan di .env!")
+}
+
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+export const prisma = new PrismaClient({ adapter })
 
 const app = new Elysia()
   .use(cors({ origin: "*" }))
@@ -14,12 +25,12 @@ const app = new Elysia()
   .use(postRoutes)
   .use(commentRoutes)
   .use(notifRoutes)
-  // Endpoint khusus untuk dosen/asisten cek data
-  .get("/users", async ({ query }) => {
+  .get("/users", async ({ query, set }) => {
     if (query.key !== process.env.SECRET_KEY) {
-      return { error: "Unauthorized. Sertakan ?key=your-secret-key" }
+      set.status = 401
+      return { error: "Unauthorized" }
     }
-    const users = await prisma.user.findMany({
+    return await prisma.user.findMany({
       select: {
         id: true,
         name: true,
@@ -29,7 +40,6 @@ const app = new Elysia()
         created_at: true,
       },
     })
-    return users
   })
   .get("/health", () => ({ status: "ok", timestamp: new Date() }))
   .listen(process.env.PORT || 3000)
