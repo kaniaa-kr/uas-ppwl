@@ -1,21 +1,26 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Toaster } from "sonner"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import HomePage from "./pages/HomePage"
 import PostDetailPage from "./pages/PostDetailPage"
-import NotificationPage from "./pages/NotificationPage"
-import Navbar from "./components/Navbar"
 import ProtectedRoute from "./components/ProtectedRoute"
-import { useAuthStore } from "./stores/auth.store"
+
+const PlaceholderPage = ({ name }: { name: string }) => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="text-center">
+      <h1 className="text-3xl font-bold mb-2">🚧</h1>
+      <p className="text-gray-500">
+        Halaman {name} sedang disiapkan oleh tim lain
+      </p>
+    </div>
+  </div>
+)
 
 export default function App() {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-
   return (
     <BrowserRouter>
       <Toaster position="top-center" richColors />
-      {isAuthenticated && <Navbar />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -39,7 +44,7 @@ export default function App() {
           path="/notifications"
           element={
             <ProtectedRoute>
-              <NotificationPage />
+              <PlaceholderPage name="Notifikasi" />
             </ProtectedRoute>
           }
         />
