@@ -1,0 +1,10 @@
+{
+  "name": "instagram-clone",
+  "version": "1.0.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:fe": "bun --cwd apps/frontend dev",
+    "dev:be": "bun --cwd apps/backend dev",
+    "dev": "concurrently \"bun dev:be\" \"bun dev:fe\""
+  }
+}
