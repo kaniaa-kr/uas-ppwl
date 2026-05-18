@@ -1,84 +1,106 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner"; 
+import React, { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { useAuthStore } from "../stores/auth.store"
+import { toast } from "sonner" 
 
-// Import asset gambar Meta dari folder assets kamu (.jpg sesuai penamaan barumu)
-import MetaLogo from "../assets/Meta.jpg"; 
+// Import asset gambar Meta dari folder assets kamu
+import MetaLogo from "../assets/Meta.jpg" 
 
+// Tetap pertahankan array untuk keindahan UI drop-down jika ingin ditampilkan, 
+// namun datanya tidak perlu dikirim ke backend panduan agar tidak error.
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const days = Array.from({ length: 31 }, (_, i) => String(i + 1));
 const years = Array.from({ length: 100 }, (_, i) => String(new Date().getFullYear() - i));
 
 export default function RegisterPage() {
-  const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate()
+  const setAuth = useAuthStore((s) => s.setAuth)
+  
+  // 1. State disesuaikan 100% dengan kebutuhan skema database panduan
   const [form, setForm] = useState({
-    contact: "",
-    password: "",
-    month: "",
-    day: "",
-    year: "",
-    fullName: "",
+    name: "",
     username: "",
-  });
+    email: "",
+    password: "",
+  })
+  
+  // Tambahan state lokal untuk variasi UI tanggal lahir agar tidak merusak payload backend
+  const [birthdayUi, setBirthdayUi] = useState({ month: "", day: "", year: "" })
+  const [loading, setLoading] = useState(false)
 
-  const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
+  // 2. Fungsi handleChange standar mengikuti panduan baku
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
 
+  // 3. Handler utama pendaftaran yang sinkron dengan backend Elysia/Express panduan
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.month || !form.day || !form.year) {
-      toast.error("Silakan lengkapi tanggal lahir Anda!");
-      return;
+    e.preventDefault()
+
+    // Validasi Lapangan Form Sesuai Panduan
+    if (!form.name || !form.username || !form.email || !form.password) {
+      toast.error("Semua field wajib diisi")
+      return
     }
 
-    setIsLoading(true);
+    if (form.password.length < 6) {
+      toast.error("Password minimal 6 karakter")
+      return
+    }
+
+    // Validasi tambahan khusus UI Instagram kamu
+    if (!birthdayUi.month || !birthdayUi.day || !birthdayUi.year) {
+      toast.error("Silakan lengkapi tanggal lahir Anda!")
+      return
+    }
+
+    setLoading(true)
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, {
+      // Menggunakan VITE_API_URL sesuai dengan file .env panduan
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          emailOrPhone: form.contact,
-          password: form.password,
-          fullName: form.fullName,
-          username: form.username,
-          birthday: `${form.year}-${form.month}-${form.day}`,
-        }),
-      });
+        body: JSON.stringify(form), // Payload bersih mengirim data yang diminta backend
+      })
+      
+      const data = await res.json()
 
-      const data = await response.json();
-      if (response.ok) {
-        toast.success("Akun berhasil dibuat! 🎉", {
-          description: "Silakan masuk menggunakan akun baru Anda.",
-          duration: 4000,
-        });
-        navigate("/login");
-      } else {
-        toast.error(data.message || "Pendaftaran gagal. Silakan coba lagi.");
+      if (!res.ok) {
+        toast.error(data.error || "Registrasi gagal")
+        return
       }
+
+      // 4. Menyimpan sesi user ke Zustand Store agar langsung masuk (Log In otomatis)
+      setAuth(data.user, data.accessToken)
+      toast.success(`Akun berhasil dibuat! Selamat datang, ${data.user.name}! 🎉`)
+      
+      // Redirect langsung ke Dashboard / Homepage utama
+      navigate("/")
     } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("Terjadi masalah jaringan atau server backend offline.");
+      console.error("Register error:", error)
+      toast.error("Terjadi kesalahan sistem atau jaringan")
     } finally {
-      setIsLoading(false);
+      setLoading(false)
     }
-  };
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleRegister(e)
+  }
 
   return (
     <div className="w-screen min-h-screen bg-white flex flex-col font-sans text-black selection:bg-blue-100 overflow-x-hidden antialiased">
       
-      {/* AREA UTAMA: Memastikan konten form berada di tengah layar secara vertikal & horisontal */}
+      {/* AREA UTAMA */}
       <div className="flex-1 flex flex-col items-center justify-center py-8 px-4 w-full">
-        
-        {/* Kontainer Form dikunci maksimal lebar 350px agar proporsional dan tidak melebar di desktop */}
         <div className="w-full max-w-[350px] flex flex-col items-stretch">
           
-          {/* Tombol Kembali (Back Arrow) */}
+          {/* Tombol Kembali ke Login */}
           <div className="w-full mb-4 flex justify-start">
             <button 
               type="button"
-              disabled={isLoading}
+              disabled={loading}
               onClick={() => navigate("/login")} 
               className="text-gray-800 hover:text-black transition bg-transparent border-none cursor-pointer p-0.5 disabled:opacity-50"
             >
@@ -114,135 +136,113 @@ export default function RegisterPage() {
           {/* Form Input Data */}
           <form onSubmit={handleRegister} className="w-full flex flex-col gap-4">
             
-            {/* Kolom No. HP / Email */}
+            {/* Kolom Nama Lengkap (Properti 'name' sesuai panduan) */}
             <div className="flex flex-col text-left gap-1">
-              <label className="text-[12px] font-bold text-gray-800">Mobile number or email</label>
+              <label className="text-[12px] font-bold text-gray-800">Full Name</label>
               <input
+                name="name"
                 type="text"
-                disabled={isLoading}
-                placeholder="Mobile number or email"
-                value={form.contact}
-                onChange={(e) => handleChange("contact", e.target.value)}
+                disabled={loading}
+                placeholder="Full name"
+                value={form.name}
+                onChange={handleChange}
+                onKeyPress={handleKeyPress}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
                 required
               />
-              <p className="text-[11px] text-gray-500 leading-normal mt-0.5">
-                You may receive notifications from us.{" "}
-                <a href="#" className="text-[#0866FF] font-semibold hover:underline no-underline">
-                  Learn why we ask for your contact information
-                </a>
-              </p>
             </div>
 
-            {/* Kolom Password */}
-            <div className="flex flex-col text-left gap-0.5">
+            {/* Kolom Username (Properti 'username' sesuai panduan) */}
+            <div className="flex flex-col text-left gap-1">
+              <label className="text-[12px] font-bold text-gray-800">Username</label>
+              <input
+                name="username"
+                type="text"
+                disabled={loading}
+                placeholder="Username"
+                value={form.username}
+                onChange={handleChange}
+                onKeyPress={handleKeyPress}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
+                required
+              />
+            </div>
+
+            {/* Kolom Email (Properti 'email' sesuai panduan) */}
+            <div className="flex flex-col text-left gap-1">
+              <label className="text-[12px] font-bold text-gray-800">Email address</label>
+              <input
+                name="email"
+                type="email"
+                disabled={loading}
+                placeholder="Email address"
+                value={form.email}
+                onChange={handleChange}
+                onKeyPress={handleKeyPress}
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
+                required
+              />
+            </div>
+
+            {/* Kolom Password (Properti 'password' sesuai panduan) */}
+            <div className="flex flex-col text-left gap-1">
               <label className="text-[12px] font-bold text-gray-800">Password</label>
               <input
+                name="password"
                 type="password"
-                disabled={isLoading}
-                placeholder="Password"
+                disabled={loading}
+                placeholder="Password (min. 6 characters)"
                 value={form.password}
-                onChange={(e) => handleChange("password", e.target.value)}
+                onChange={handleChange}
+                onKeyPress={handleKeyPress}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
                 required
               />
             </div>
 
-            {/* Kolom Pilihan Tanggal Lahir */}
+            {/* Kolom Pilihan Tanggal Lahir (Hanya untuk kosmetik UI Instagram) */}
             <div className="flex flex-col text-left gap-1">
               <div className="flex items-center gap-1">
                 <label className="text-[12px] font-bold text-gray-800">Birthday</label>
-                <span 
-                  className="w-3.5 h-3.5 rounded-full border border-gray-400 flex items-center justify-center text-[10px] text-gray-500 font-bold cursor-help" 
-                  title="Why do we ask for your birthday?"
-                >
-                  ?
-                </span>
               </div>
               
               <div className="flex gap-2">
-                {/* Dropdown Bulan */}
-                <div className="relative flex-1">
-                  <select 
-                    value={form.month} 
-                    disabled={isLoading}
-                    onChange={(e) => handleChange("month", e.target.value)} 
-                    className="w-full p-2.5 pr-8 border border-gray-300 rounded-xl text-[13px] bg-white cursor-pointer focus:outline-none focus:border-gray-400 appearance-none text-black disabled:bg-gray-50"
-                    required
-                  >
-                    <option value="">Month</option>
-                    {months.map((m) => <option key={m} value={m}>{m}</option>)}
-                  </select>
-                  <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
+                <select 
+                  value={birthdayUi.month} 
+                  disabled={loading}
+                  onChange={(e) => setBirthdayUi(prev => ({...prev, month: e.target.value}))} 
+                  className="flex-1 p-2.5 border border-gray-300 rounded-xl text-[13px] bg-white text-black text-xs focus:outline-none"
+                  required
+                >
+                  <option value="">Month</option>
+                  {months.map((m) => <option key={m} value={m}>{m}</option>)}
+                </select>
 
-                {/* Dropdown Hari */}
-                <div className="relative flex-1">
-                  <select 
-                    value={form.day} 
-                    disabled={isLoading}
-                    onChange={(e) => handleChange("day", e.target.value)} 
-                    className="w-full p-2.5 pr-8 border border-gray-300 rounded-xl text-[13px] bg-white cursor-pointer focus:outline-none focus:border-gray-400 appearance-none text-black disabled:bg-gray-50"
-                    required
-                  >
-                    <option value="">Day</option>
-                    {days.map((d) => <option key={d} value={d}>{d}</option>)}
-                  </select>
-                  <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
+                <select 
+                  value={birthdayUi.day} 
+                  disabled={loading}
+                  onChange={(e) => setBirthdayUi(prev => ({...prev, day: e.target.value}))} 
+                  className="flex-1 p-2.5 border border-gray-300 rounded-xl text-[13px] bg-white text-black text-xs focus:outline-none"
+                  required
+                >
+                  <option value="">Day</option>
+                  {days.map((d) => <option key={d} value={d}>{d}</option>)}
+                </select>
 
-                {/* Dropdown Tahun */}
-                <div className="relative flex-1">
-                  <select 
-                    value={form.year} 
-                    disabled={isLoading}
-                    onChange={(e) => handleChange("year", e.target.value)} 
-                    className="w-full p-2.5 pr-8 border border-gray-300 rounded-xl text-[13px] bg-white cursor-pointer focus:outline-none focus:border-gray-400 appearance-none text-black disabled:bg-gray-50"
-                    required
-                  >
-                    <option value="">Year</option>
-                    {years.map((y) => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                  <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none text-gray-400">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </div>
+                <select 
+                  value={birthdayUi.year} 
+                  disabled={loading}
+                  onChange={(e) => setBirthdayUi(prev => ({...prev, year: e.target.value}))} 
+                  className="flex-1 p-2.5 border border-gray-300 rounded-xl text-[13px] bg-white text-black text-xs focus:outline-none"
+                  required
+                >
+                  <option value="">Year</option>
+                  {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                </select>
               </div>
             </div>
 
-            {/* Kolom Nama */}
-            <div className="flex flex-col text-left gap-0.5">
-              <label className="text-[12px] font-bold text-gray-800">Name</label>
-              <input
-                type="text"
-                disabled={isLoading}
-                placeholder="Full name"
-                value={form.fullName}
-                onChange={(e) => handleChange("fullName", e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
-                required
-              />
-            </div>
-
-            {/* Kolom Username */}
-            <div className="flex flex-col text-left gap-0.5">
-              <label className="text-[12px] font-bold text-gray-800">Username</label>
-              <input
-                type="text"
-                disabled={isLoading}
-                placeholder="Username"
-                value={form.username}
-                onChange={(e) => handleChange("username", e.target.value)}
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-[13px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition"
-                required
-              />
-            </div>
-
-            {/* Teks Kebijakan Ketentuan */}
+            {/* Teks Regulasi Legal */}
             <div className="text-[11px] text-left text-gray-500 flex flex-col gap-3 mt-1 leading-relaxed font-normal">
               <p>
                 People who use our service may have uploaded your contact information to Instagram.{" "}
@@ -256,30 +256,28 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Tombol Aksi Form */}
+            {/* Tombol Aksi Registrasi */}
             <div className="flex flex-col gap-2.5 mt-3">
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="w-full py-2.5 bg-[#0064E0] hover:bg-blue-700 text-white font-bold rounded-full text-[13.5px] transition duration-200 cursor-pointer border-none shadow-sm disabled:opacity-50"
               >
-                {isLoading ? "Submitting..." : "Submit"}
+                {loading ? "Submitting..." : "Submit"}
               </button>
 
-              <button
-                type="button"
-                disabled={isLoading}
-                onClick={() => navigate("/login")}
-                className="w-full py-2.5 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 font-bold rounded-full text-[13.5px] transition duration-200 cursor-pointer disabled:opacity-50"
+              <Link
+                to="/login"
+                className="w-full py-2.5 bg-white text-gray-800 border border-gray-300 hover:bg-gray-50 font-bold rounded-full text-[13.5px] transition duration-200 text-center no-underline block"
               >
                 I already have an account
-              </button>
+              </Link>
             </div>
           </form>
         </div>
       </div>
 
-      {/* Footer Utama */}
+      {/* Footer Komponen */}
       <footer className="w-full py-4 bg-white text-[10px] text-gray-400 border-t border-gray-100">
         <div className="w-full max-w-[1000px] mx-auto px-4 flex flex-col items-center gap-1.5">
           <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-center font-normal">
@@ -296,5 +294,5 @@ export default function RegisterPage() {
       </footer>
 
     </div>
-  );
+  )
 }

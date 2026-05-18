@@ -15,15 +15,16 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" richColors />
+      
+      {/* Navbar hanya muncul jika user sudah login */}
       {isAuthenticated && <Navbar />}
+      
       <Routes>
-        {/* Jika sudah login tapi coba buka /login, lempar balik ke beranda (/) */}
-        <Route 
-          path="/login" 
-          element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} 
-        />
+        {/* Mengikuti panduan: /login dan /register tidak di-guard secara ketat di sini */}
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         
+        {/* Rute utama yang dilindungi menggunakan ProtectedRoute sesuai panduan */}
         <Route
           path="/"
           element={

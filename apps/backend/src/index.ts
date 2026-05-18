@@ -10,7 +10,7 @@ import { commentRoutes } from "./routes/comments"
 import { notifRoutes } from "./routes/notifications"
 
 // Setup Prisma dengan Adapter PostgreSQL (wajib untuk Prisma v7)
-const connectionString = process.env.DATABASE_URL
+export const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
   throw new Error("DATABASE_URL tidak ditemukan di .env!")
 }
