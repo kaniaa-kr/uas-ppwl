@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth.store';
 import { toast } from 'sonner';
+import LogoInstagram from "../assets/logo-instagram.jpg";
 
 interface LoginPageProps {
   onLoginSuccess?: () => void;
@@ -116,7 +117,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             {/* Logo kecil atas */}
             <div className="mb-6 flex justify-start">
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg"
+                src={LogoInstagram}
                 alt="Instagram"
                 className="w-12 h-12 object-contain"
               />
