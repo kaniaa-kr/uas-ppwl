@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route} from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { Toaster } from "sonner"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
@@ -17,8 +17,13 @@ export default function App() {
       <Toaster position="top-center" richColors />
       {isAuthenticated && <Navbar />}
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        {/* Jika sudah login tapi coba buka /login, lempar balik ke beranda (/) */}
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />} 
+        />
         <Route path="/register" element={<RegisterPage />} />
+        
         <Route
           path="/"
           element={
@@ -43,6 +48,9 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Jaga-jaga jika mengetik rute asal-asalan, lempar ke beranda */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
