@@ -1,18 +1,19 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
-export type User = {
+export type AuthUser = {
   id: string
   name: string
+  username: string
   email: string
-  avatarUrl?: string
+  avatar_url?: string
 }
 
 type AuthStore = {
-  user: User | null
+  user: AuthUser | null
   token: string | null
   isAuthenticated: boolean
-  setAuth: (user: User, token: string) => void
+  setAuth: (user: AuthUser, token: string) => void
   logout: () => void
 }
 
@@ -27,18 +28,18 @@ export const useAuthStore = create<AuthStore>()(
         set({
           user,
           token,
-          isAuthenticated: true
+          isAuthenticated: true,
         }),
 
       logout: () =>
         set({
           user: null,
           token: null,
-          isAuthenticated: false
-        })
+          isAuthenticated: false,
+        }),
     }),
     {
-      name: "auth-storage" // Otomatis tersimpan di localStorage browser
+      name: "auth-storage", // Nama key di localStorage
     }
   )
 )
