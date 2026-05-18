@@ -10,7 +10,10 @@ if (!connectionString) {
   throw new Error("DATABASE_URL tidak ditemukan di file .env!")
 }
 
-const pool = new Pool({ connectionString })
+const pool = new Pool({
+  connectionString,
+  ssl: process.env.DATABASE_URL?.includes("localhost") ? false : { rejectUnauthorized: false },
+})
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
