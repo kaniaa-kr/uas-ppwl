@@ -186,13 +186,12 @@ export default function Login({ onLoginSuccess }: LoginProps) {
         Forgot password?
       </button>
 
-      {/* Tombol Pihak Ketiga */}
+      {/* Tombol Akses Pihak Ketiga */}
       <div className="w-full flex flex-col gap-3 mt-auto">
-        {/* Tombol Log in dengan Google */}
+        {/* Tombol Log in dengan Google (Tetap memakai Teks & Ikon Google) */}
         <button
           type="button"
           onClick={() => {
-            // Menggunakan VITE_BACKEND_URL dinamis dari env
             window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/login`;
           }}
           className="w-full py-3 border border-gray-300 rounded-full flex items-center justify-center gap-2 text-sm font-semibold text-gray-800 bg-white hover:bg-gray-50 transition cursor-pointer"

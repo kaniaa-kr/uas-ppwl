@@ -16,6 +16,7 @@
         "@prisma/adapter-pg": "^7.8.0",
         "@prisma/client": "latest",
         "bcryptjs": "latest",
+        "dotenv": "^17.4.2",
         "elysia": "latest",
         "jsonwebtoken": "latest",
         "pg": "^8.20.0",
@@ -23,6 +24,7 @@
       },
       "devDependencies": {
         "@types/bcryptjs": "latest",
+        "@types/bun": "^1.3.14",
         "@types/jsonwebtoken": "latest",
         "@types/pg": "^8.20.0",
       },
