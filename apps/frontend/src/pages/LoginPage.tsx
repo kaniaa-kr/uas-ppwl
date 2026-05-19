@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom"
 import { useAuthStore } from "../stores/auth.store"
 import { toast } from "sonner"
 import LogoInstagram from "../assets/logo-instagram.jpg"
-import LogoMeta from "../assets/Meta.jpg" 
+import LogoMeta from "../assets/Meta.jpg"
 
 interface LoginProps {
   onLoginSuccess?: () => void;
@@ -28,7 +28,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
     const name = searchParams.get('name');
     const emailUrl = searchParams.get('email');
     const avatarUrl = searchParams.get('avatarUrl');
-    
+
     const usernameFromUrl = searchParams.get('username') || (emailUrl ? emailUrl.split('@')[0] : '');
 
     if (token && id && name && emailUrl) {
@@ -37,8 +37,8 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           id: id,
           name: name,
           email: emailUrl,
-          username: usernameFromUrl, 
-          avatar_url: avatarUrl || undefined 
+          username: usernameFromUrl,
+          avatar_url: avatarUrl || undefined
         },
         token
       );
@@ -49,7 +49,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
       });
 
       if (onLoginSuccess) onLoginSuccess();
-      navigate('/'); 
+      navigate('/');
     }
   }, [searchParams, setAuth, navigate, onLoginSuccess]);
 
@@ -68,14 +68,14 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-      
+
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: email, 
+          email: email,
           password: password,
         }),
       });
@@ -88,8 +88,8 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             id: data.user.id,
             name: data.user.name,
             email: data.user.email,
-            username: data.user.username, 
-            avatar_url: data.user.avatar_url || undefined, 
+            username: data.user.username,
+            avatar_url: data.user.avatar_url || undefined,
           },
           data.accessToken
         );
@@ -264,7 +264,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             </div>
 
             <h1 style={{
-              fontSize: "42px", 
+              fontSize: "42px",
               fontWeight: 400,
               color: "#000000",
               lineHeight: 1.25,
@@ -279,10 +279,10 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             <div style={{ position: "relative", width: "560px", height: "450px", marginTop: "10px" }}>
               {/* Gambar Kiri (Miring) */}
               <div style={{
-                position: "absolute", 
-                width: "215px",  
-                height: "340px", 
-                left: "10px", 
+                position: "absolute",
+                width: "215px",
+                height: "340px",
+                left: "10px",
                 bottom: "10px",
                 transform: "rotate(-12deg)", zIndex: 10,
                 borderRadius: "24px", overflow: "hidden",
@@ -294,9 +294,9 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
               {/* Gambar Tengah (Utama / Paling Depan) */}
               <div style={{
-                position: "absolute", 
-                width: "265px",  
-                height: "410px", 
+                position: "absolute",
+                width: "265px",
+                height: "410px",
                 left: "50%", transform: "translateX(-50%)", top: "0px", zIndex: 30,
                 borderRadius: "28px", overflow: "hidden",
                 border: "4px solid white",
@@ -314,10 +314,10 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
               {/* Gambar Kanan (Miring) */}
               <div style={{
-                position: "absolute", 
-                width: "215px",  
-                height: "340px", 
-                right: "10px", 
+                position: "absolute",
+                width: "215px",
+                height: "340px",
+                right: "10px",
                 bottom: "20px",
                 transform: "rotate(10deg)", zIndex: 20,
                 borderRadius: "24px", overflow: "hidden",
@@ -337,7 +337,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            padding: "0 50px", 
+            padding: "0 50px",
             boxSizing: "border-box",
             height: "100%"
           }}>
@@ -440,11 +440,11 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               </div>
 
               {/* BRANDING META */}
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginTop: "48px" }}>
-                <img 
-                  src={LogoMeta} 
-                  alt="Meta Logo" 
-                  style={{ width: "24px", height: "auto", objectFit: "contain" }} 
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", justifyContent: "center", marginTop: "12px" }}>
+                <img
+                  src={LogoMeta}
+                  alt="Meta Logo"
+                  style={{ width: "24px", height: "auto", objectFit: "contain" }}
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
                 <span style={{ fontSize: "14px", fontWeight: 600, color: "#374151", letterSpacing: "0.05em" }}>Meta</span>
@@ -464,19 +464,19 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px" }}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
-              {["Meta","About","Blog","Jobs","Help","API","Privacy","Terms","Locations","Popular","Instagram Lite","Meta AI","Threads","Contact Uploading & Non-Users","Meta Verified","Meta in Indonesia"].map((item) => (
+              {["Meta", "About", "Blog", "Jobs", "Help", "API", "Privacy", "Terms", "Locations", "Popular", "Instagram Lite", "Meta AI", "Threads", "Contact Uploading & Non-Users", "Meta Verified", "Meta in Indonesia"].map((item) => (
                 <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
                   {item}
                 </a>
               ))}
             </div>
-            
+
             {/* 🌟 PERBAIKAN JARAK: Mengubah gap dari 16px menjadi 6px agar lebih rapat seperti di gambar */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", color: "#737373" }}>
-              
+
               {/* Dropdown Bahasa Interaktif */}
               <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
-                <select 
+                <select
                   defaultValue="en"
                   style={{
                     fontSize: "12px",
@@ -502,14 +502,14 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   <option value="ja">日本語</option>
                 </select>
                 {/* Icon Panah Kecil (Chevron) Gaya Instagram */}
-                <svg 
-                  width="10" 
-                  height="10" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="#737373" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
+                <svg
+                  width="10"
+                  height="10"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#737373"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                   style={{ pointerEvents: "none", marginLeft: "2px" }}
                 >
