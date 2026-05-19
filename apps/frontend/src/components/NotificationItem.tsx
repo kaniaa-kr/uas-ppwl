@@ -1,72 +1,71 @@
-import { Notification } from "../stores/notification.store"
+import type { Notification } from "../stores/notification.store"
 
-type NotificationItemProps = {
-  notification: Notification
-  onMarkAsRead?: (id: string) => void
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 1) return "baru saja"
+  if (minutes < 60) return `${minutes} menit lalu`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} jam lalu`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days} hari lalu`
+  const weeks = Math.floor(days / 7)
+  return `${weeks} minggu lalu`
 }
 
-export default function NotificationItem({
-  notification,
-  onMarkAsRead,
-}: NotificationItemProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffMs = now.getTime() - date.getTime()
-    const diffMins = Math.floor(diffMs / 60000)
-    if (diffMins < 1) return "Baru saja"
-    if (diffMins < 60) return `${diffMins} menit lalu`
-    const diffHours = Math.floor(diffMins / 60)
-    if (diffHours < 24) return `${diffHours} jam lalu`
-    const diffDays = Math.floor(diffHours / 24)
-    if (diffDays < 7) return `${diffDays} hari lalu`
-    return date.toLocaleDateString("id-ID")
-  }
+type Props = {
+  notification: Notification
+  onMarkAsRead: (id: string) => void
+}
+
+export default function NotificationItem({ notification, onMarkAsRead }: Props) {
+  const { actor, type, post, is_read, created_at, id } = notification
+
+  const initials = actor.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2)
 
   const message =
-    notification.type === "like"
-      ? "menyukai postingan kamu"
-      : "mengomentari postingan kamu"
+    type === "like"
+      ? "menyukai postingan kamu."
+      : "mengomentari postingan kamu."
 
   return (
     <div
-      className={`flex gap-3 rounded-lg p-3 border transition cursor-pointer hover:bg-gray-50 ${
-        !notification.is_read ? "bg-blue-50 border-blue-100" : "bg-white"
+      onClick={() => onMarkAsRead(id)}
+      className={`flex items-center gap-3 px-2 py-3 rounded-xl cursor-pointer hover:bg-gray-50 transition ${
+        !is_read ? "bg-blue-50" : ""
       }`}
-      onClick={() => onMarkAsRead && onMarkAsRead(notification.id)}
     >
-      {/* Avatar actor */}
-      <img
-        src={
-          notification.actor.avatar_url ||
-          `https://ui-avatars.com/api/?name=${notification.actor.name}`
-        }
-        alt={notification.actor.name}
-        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-      />
-
-      {/* Konten notifikasi */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm">
-          <span className="font-semibold">{notification.actor.name}</span>{" "}
-          {message}
-        </p>
-
-        {/* Preview postingan */}
-        {notification.post && (
-          <p className="text-xs text-gray-500 mt-1 truncate">
-            "{notification.post.content}"
-          </p>
+      {/* Avatar */}
+      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold text-white flex-shrink-0">
+        {actor.avatar_url ? (
+          <img
+            src={actor.avatar_url}
+            alt={actor.name}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          initials
         )}
+      </div>
 
-        <p className="text-xs text-gray-400 mt-1">
-          {formatDate(notification.created_at)}
-        </p>
+      {/* Teks */}
+      <div className="flex-1 text-sm">
+        <span className="font-semibold">{actor.username}</span>{" "}
+        <span className="text-gray-700">{message}</span>
+        {post && (
+          <span className="text-gray-400"> "{post.content.slice(0, 30)}..."</span>
+        )}
+        <div className="text-xs text-gray-400 mt-0.5">{timeAgo(created_at)}</div>
       </div>
 
       {/* Indikator belum dibaca */}
-      {!notification.is_read && (
-        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-2" />
+      {!is_read && (
+        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0" />
       )}
     </div>
   )

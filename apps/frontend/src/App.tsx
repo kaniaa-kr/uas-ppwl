@@ -4,18 +4,20 @@ import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import HomePage from "./pages/HomePage"
 import PostDetailPage from "./pages/PostDetailPage"
+import NotificationPage from "./pages/NotificationPage"
 import ProtectedRoute from "./components/ProtectedRoute"
+import Navbar from "./components/Navbar"
 
-const PlaceholderPage = ({ name }: { name: string }) => (
-  <div className="flex items-center justify-center h-screen">
-    <div className="text-center">
-      <h1 className="text-3xl font-bold mb-2">🚧</h1>
-      <p className="text-gray-500">
-        Halaman {name} sedang disiapkan oleh tim lain
-      </p>
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex">
+      <Navbar />
+      <main className="ml-20 flex-1 min-h-screen transition-all duration-300">
+        {children}
+      </main>
     </div>
-  </div>
-)
+  )
+}
 
 export default function App() {
   return (
@@ -28,7 +30,7 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <HomePage />
+              <Layout><HomePage /></Layout>
             </ProtectedRoute>
           }
         />
@@ -36,7 +38,7 @@ export default function App() {
           path="/post/:id"
           element={
             <ProtectedRoute>
-              <PostDetailPage />
+              <Layout><PostDetailPage /></Layout>
             </ProtectedRoute>
           }
         />
@@ -44,7 +46,7 @@ export default function App() {
           path="/notifications"
           element={
             <ProtectedRoute>
-              <PlaceholderPage name="Notifikasi" />
+              <Layout><NotificationPage /></Layout>
             </ProtectedRoute>
           }
         />
