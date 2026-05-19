@@ -22,20 +22,13 @@ export default function Navbar() {
 
   return (
     <>
-      {/* Sidebar kiri */}
       <aside
         className={`fixed top-0 left-0 h-screen ${sidebarWidth} border-r bg-white flex flex-col px-3 py-6 z-40 transition-all duration-300`}
       >
-        {/* Logo */}
         <div className="px-3 mb-8 overflow-hidden">
-          {showNotif ? (
-            <span className="font-bold text-xl">📷</span>
-          ) : (
-            <span className="font-bold text-xl"></span>
-          )}
+          <span className="font-bold text-xl">📷</span>
         </div>
 
-        {/* Menu navigasi */}
         <nav className="flex flex-col gap-1">
           {navItems.map(({ icon: Icon, label, to }) => (
             <Link
@@ -50,7 +43,6 @@ export default function Navbar() {
             </Link>
           ))}
 
-          {/* Tombol Notifikasi */}
           <button
             onClick={() => setShowNotif((prev) => !prev)}
             className={`flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-gray-100 transition text-sm font-medium w-full text-left ${
@@ -69,7 +61,6 @@ export default function Navbar() {
           </button>
         </nav>
 
-        {/* Avatar & Logout di bawah */}
         <div className="mt-auto flex flex-col gap-2 px-3">
           <Link
             to="/profile"
@@ -99,7 +90,6 @@ export default function Navbar() {
         </div>
       </aside>
 
-      {/* Panel Notifikasi */}
       {showNotif && (
         <NotificationPanel onClose={() => setShowNotif(false)} />
       )}

@@ -1,12 +1,20 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Toaster } from "sonner"
-import LoginPage from "./pages/LoginPage"
-import RegisterPage from "./pages/RegisterPage"
 import HomePage from "./pages/HomePage"
 import PostDetailPage from "./pages/PostDetailPage"
 import NotificationPage from "./pages/NotificationPage"
-import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
+
+const PlaceholderPage = ({ name }: { name: string }) => (
+  <div className="flex items-center justify-center h-screen bg-gray-50">
+    <div className="text-center">
+      <h1 className="text-3xl font-bold mb-2">🚧</h1>
+      <p className="text-gray-500">
+        Halaman {name} sedang disiapkan oleh tim lain
+      </p>
+    </div>
+  </div>
+)
 
 function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,32 +32,11 @@ export default function App() {
     <BrowserRouter>
       <Toaster position="top-center" richColors />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Layout><HomePage /></Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post/:id"
-          element={
-            <ProtectedRoute>
-              <Layout><PostDetailPage /></Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedRoute>
-              <Layout><NotificationPage /></Layout>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/login" element={<PlaceholderPage name="Login" />} />
+        <Route path="/register" element={<PlaceholderPage name="Register" />} />
+        <Route path="/" element={<Layout><HomePage /></Layout>} />
+        <Route path="/post/:id" element={<Layout><PostDetailPage /></Layout>} />
+        <Route path="/notifications" element={<Layout><NotificationPage /></Layout>} />
       </Routes>
     </BrowserRouter>
   )
