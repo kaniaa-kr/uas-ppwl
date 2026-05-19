@@ -410,7 +410,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               <button type="button" style={{
                 fontSize: "14px", fontWeight: 500, color: "#1f2937", background: "transparent",
                 border: "none", cursor: "pointer", marginTop: "20px", marginBottom: "40px",
-                textAlign: "left", paddingLeft: "4px"
+                textAlign: "center", paddingLeft: "4px"
               }}>
                 Forgot password?
               </button>
@@ -454,7 +454,6 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           </div>
 
         </div>
-
         {/* FOOTER */}
         <footer style={{
           width: "100%",
@@ -463,7 +462,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           boxSizing: "border-box",
           borderTop: "1px solid #f1f1f1"
         }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px" }}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
               {["Meta","About","Blog","Jobs","Help","API","Privacy","Terms","Locations","Popular","Instagram Lite","Meta AI","Threads","Contact Uploading & Non-Users","Meta Verified","Meta in Indonesia"].map((item) => (
                 <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
@@ -471,9 +470,55 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                 </a>
               ))}
             </div>
-            <div style={{ display: "flex", gap: "16px", fontSize: "12px", color: "#737373" }}>
-              <span>English</span>
-              <span>© 2026 Instagram from Meta</span>
+            
+            {/* 🌟 PERBAIKAN JARAK: Mengubah gap dari 16px menjadi 6px agar lebih rapat seperti di gambar */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", color: "#737373" }}>
+              
+              {/* Dropdown Bahasa Interaktif */}
+              <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+                <select 
+                  defaultValue="en"
+                  style={{
+                    fontSize: "12px",
+                    color: "#737373",
+                    background: "transparent",
+                    border: "none",
+                    paddingRight: "0px",
+                    cursor: "pointer",
+                    outline: "none",
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none"
+                  }}
+                  onChange={(e) => {
+                    console.log("Bahasa diganti ke:", e.target.value);
+                  }}
+                >
+                  <option value="en">English</option>
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="ms">Bahasa Melayu</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="ja">日本語</option>
+                </select>
+                {/* Icon Panah Kecil (Chevron) Gaya Instagram */}
+                <svg 
+                  width="10" 
+                  height="10" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#737373" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  style={{ pointerEvents: "none", marginLeft: "2px" }}
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+
+              {/* Teks Copyright */}
+              <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
             </div>
           </div>
         </footer>

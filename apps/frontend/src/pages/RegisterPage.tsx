@@ -113,15 +113,17 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          {/* Logo Meta */}
-          <div className="w-full flex items-center gap-1.5 mb-2 select-none justify-start">
+          {/* Logo Meta - 🌟 PERBAIKAN: Mengubah gap menjadi super mepet */}
+          <div className="w-full flex items-center gap-[3px] mb-2 select-none justify-start">
             <img
               src={MetaLogo}
               alt="Meta Logo"
-              className="h-[12px] w-auto object-contain"
+              className="h-[30px] w-auto object-contain block"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <span className="text-[12px] font-bold tracking-tight text-gray-400">Meta</span>
+            <span className="text-[17px] font-bold tracking-tight text-gray-400 uppercase leading-none" style={{ marginTop: "1px" }}>
+              Meta
+            </span>
           </div>
 
           {/* Judul Halaman - 🌟 DIKECILKAN DIKIT: Ukuran teks disesuaikan agar lebih proporsional */}
@@ -143,7 +145,7 @@ export default function RegisterPage() {
 
             {/* 1. Mobile number or email - 🌟 DIKECILKAN DIKIT: Menggunakan text-[14px] dan py-3 */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
-              <label className="text-[14px] font-semibold text-black">Mobile number or email</label>
+              <label className="text-[17px] font-semibold text-black">Mobile number or email</label>
               <input
                 name="email"
                 type="text"
@@ -158,13 +160,13 @@ export default function RegisterPage() {
             </div>
 
             {/* Catatan Info Kontak */}
-            <div className="text-[11.5px] text-left text-gray-500 leading-normal font-normal w-full box-border -mt-2">
+            <div className="text-[15px] text-left text-gray-800 leading-normal font-normal w-full box-border -mt-2">
               You may receive notifications from us. <a href="#" className="text-[#0064E0] font-semibold no-underline hover:underline">Learn why we ask for your contact information</a>
             </div>
 
             {/* 2. Password */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
-              <label className="text-[14px] font-semibold text-black">Password</label>
+              <label className="text-[17px] font-semibold text-black">Password</label>
               <input
                 name="password"
                 type="password"
@@ -178,26 +180,49 @@ export default function RegisterPage() {
               />
             </div>
 
-            {/* 3. Birthday */}
+            {/* 3. Birthday - KODE YANG SUDAH DIPERBARUI TOTAL */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <div className="flex items-center gap-1">
-                <label className="text-[14px] font-semibold text-black">Birthday</label>
-                <span className="text-[13px] text-gray-500 cursor-help">ⓘ</span>
+                <label className="text-[17px] font-semibold text-black">Birthday</label>
+                {/* 🌟 SEKARANG: Menggunakan Tanda Tanya Dalam Lingkaran (SVG) */}
+                <div style={{ display: "inline-flex", alignItems: "center", cursor: "help", marginLeft: "2px" }}>
+                  <svg 
+                    width="14" 
+                    height="14" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="#737373" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
               </div>
+              
               <div className="flex gap-2.5 w-full box-border">
+                
                 {/* Month */}
                 <div className="flex-1 relative">
                   <select
                     value={birthdayUi.month}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, month: e.target.value }))}
-                    className="w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black focus:outline-none box-border"
+                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.month ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
-                    <option value="">Month</option>
-                    {months.map((m) => <option key={m} value={m}>{m}</option>)}
+                    <option value="" className="text-gray-400">Month</option>
+                    {months.map((m) => <option key={m} value={m} className="text-black">{m}</option>)}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-[12px]">▼</div>
+                  {/* Chevron Panah Halus */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
                 </div>
 
                 {/* Day */}
@@ -206,13 +231,18 @@ export default function RegisterPage() {
                     value={birthdayUi.day}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, day: e.target.value }))}
-                    className="w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black focus:outline-none box-border"
+                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.day ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
-                    <option value="">Day</option>
-                    {days.map((d) => <option key={d} value={d}>{d}</option>)}
+                    <option value="" className="text-gray-400">Day</option>
+                    {days.map((d) => <option key={d} value={d} className="text-black">{d}</option>)}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-[12px]">▼</div>
+                  {/* Chevron Panah Halus */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
                 </div>
 
                 {/* Year */}
@@ -221,20 +251,26 @@ export default function RegisterPage() {
                     value={birthdayUi.year}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, year: e.target.value }))}
-                    className="w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black focus:outline-none box-border"
+                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.year ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
-                    <option value="">Year</option>
-                    {years.map((y) => <option key={y} value={y}>{y}</option>)}
+                    <option value="" className="text-gray-400">Year</option>
+                    {years.map((y) => <option key={y} value={y} className="text-black">{y}</option>)}
                   </select>
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-[12px]">▼</div>
+                  {/* Chevron Panah Halus */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </div>
                 </div>
+
               </div>
             </div>
 
             {/* 4. Name */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
-              <label className="text-[14px] font-semibold text-black">Name</label>
+              <label className="text-[17px] font-semibold text-black">Name</label>
               <input
                 name="name"
                 type="text"
@@ -250,7 +286,7 @@ export default function RegisterPage() {
 
             {/* 5. Username */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
-              <label className="text-[14px] font-semibold text-black">Username</label>
+              <label className="text-[17px] font-semibold text-black">Username</label>
               <input
                 name="username"
                 type="text"
@@ -265,7 +301,7 @@ export default function RegisterPage() {
             </div>
 
             {/* Kebijakan / Legalities */}
-            <div className="text-[12px] text-left text-gray-500 flex flex-col gap-2 mt-1 leading-relaxed font-normal w-full box-border">
+            <div className="text-[15px] text-left text-gray-800 flex flex-col gap-2 mt-1 leading-relaxed font-normal w-full box-border">
               <p>
                 People who use our service may have uploaded your contact information to Instagram.{" "}
                 <a href="#" className="text-[#0064E0] font-semibold no-underline hover:underline">Learn more.</a>
@@ -276,7 +312,7 @@ export default function RegisterPage() {
                 <a href="#" className="text-[#0064E0] font-semibold no-underline hover:underline">Privacy Policy</a> and{" "}
                 <a href="#" className="text-[#0064E0] font-semibold no-underline hover:underline">Cookies Policy</a>.
               </p>
-              <p className="text-gray-500">
+              <p className="text-gray-800">
                 The <a href="#" className="text-[#0064E0] font-semibold no-underline hover:underline">Privacy Policy</a> describes the ways we can use the information we collect when you create an account. For example, we use this information to provide, personalize and improve our products, including ads.
               </p>
             </div>
@@ -303,17 +339,77 @@ export default function RegisterPage() {
       </div>
 
       {/* Footer Bawah - Tanpa Border Atas */}
-      <footer className="w-full max-w-full py-4 bg-white text-[11px] text-gray-400 mt-auto box-border shrink-0">
-        <div className="w-full max-w-[1000px] mx-auto px-4 flex flex-col items-center gap-1.5 box-border">
-          <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-center font-normal w-full">
-            {['Meta', 'About', 'Blog', 'Jobs', 'Help', 'API', 'Privacy', 'Terms', 'Locations', 'Instagram Lite', 'Contact Uploading & Non-Users', 'Meta Verified'].map((item) => (
-              <a key={item} href="#" className="hover:underline text-gray-400 no-underline whitespace-nowrap">{item}</a>
-            ))}
-          </div>
-          <div className="flex items-center gap-1 text-gray-400">
-            <span>English</span>
-            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-            <span className="ml-1">© 2026 Instagram from Meta</span>
+      {/* FOOTER */}
+        <footer style={{
+          width: "100%",
+          background: "#ffffff",
+          padding: "24px 0",
+          boxSizing: "border-box",
+          borderTop: "1px solid #f1f1f1"
+        }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
+              {["Meta","About","Blog","Jobs","Help","API","Privacy","Terms","Locations","Popular","Instagram Lite","Meta AI","Threads","Contact Uploading & Non-Users","Meta Verified","Meta in Indonesia"].map((item) => (
+                <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
+                  {item}
+                </a>
+              ))}
+            </div>
+            
+            {/* 🌟 PENYESUAIAN TOTAL: Menggunakan gap 0px agar teks bahasa, panah, dan copyright saling merapat sempurna */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0px", fontSize: "12px", color: "#737373" }}>
+              
+              {/* Dropdown Bahasa Interaktif */}
+              <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+                <select 
+                  defaultValue="en"
+                  style={{
+                    fontSize: "12px",
+                    color: "#737373",
+                    background: "transparent",
+                    border: "none",
+                    width: "42px", // Memangkas paksa sisa space kosong di kanan kata "English"
+                    padding: "0px",
+                    cursor: "pointer",
+                    outline: "none",
+                    appearance: "none",
+                    WebkitAppearance: "none",
+                    MozAppearance: "none"
+                  }}
+                  onChange={(e) => {
+                    console.log("Bahasa diganti ke:", e.target.value);
+                  }}
+                >
+                  <option value="en">English</option>
+                  <option value="id">Bahasa Indonesia</option>
+                  <option value="ms">Bahasa Melayu</option>
+                  <option value="es">Español</option>
+                  <option value="fr">Français</option>
+                  <option value="ja">日本語</option>
+                </select>
+                
+                {/* Icon Panah Kecil (Chevron) Gaya Instagram */}
+                <svg 
+                  width="10" 
+                  height="10" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="#737373" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  style={{ pointerEvents: "none", marginLeft: "2px" }}
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </div>
+
+              {/* Teks Copyright dengan Jarak yang Diatur Manis lewat Margin */}
+              <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
+
+            {/* Teks Copyright dengan Jarak Merapat Nyaman */}
+            <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
+
           </div>
         </div>
       </footer>
