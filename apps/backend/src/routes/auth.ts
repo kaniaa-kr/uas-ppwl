@@ -6,6 +6,16 @@ import jwt from "jsonwebtoken"
 const JWT_SECRET = process.env.JWT_SECRET || "secret-dev"
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
+  // ✨ PENYEMPURNAAN GLOBAL: Mengatasi masalah "Do not know how to serialize a BigInt"
+  .mapResponse(({ response, set }) => {
+    if (response && typeof response === "object") {
+      const stringified = JSON.parse(
+        JSON.stringify(response, (_, v) => (typeof v === "bigint" ? v.toString() : v))
+      )
+      return stringified
+    }
+    return response
+  })
 
   // ====== POST /auth/register ======
   .post(
@@ -62,8 +72,11 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       return {
         message: "Register berhasil",
         user: {
-          ...user,
           id: user.id.toString(),
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          avatar_url: user.avatar_url,
         },
         accessToken: token,
       }
@@ -128,7 +141,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     }
   )
 
-  // ====== GET /auth/me (Optional, verify token) ======
+  // ====== GET /auth/me ======
   .get(
     "/me",
     async ({ headers, set }) => {
@@ -158,7 +171,14 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           return { error: "User tidak ditemukan" }
         }
 
-        return { ...user, id: user.id.toString() }
+        // ✨ DIPERBAIKI: Eksplisit memetakan field untuk menghindari crash BigInt JSON
+        return {
+          id: user.id.toString(),
+          name: user.name,
+          username: user.username,
+          email: user.email,
+          avatar_url: user.avatar_url,
+        }
       } catch (e) {
         set.status = 401
         return { error: "Token tidak valid atau sudah expired" }

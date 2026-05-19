@@ -260,3 +260,10 @@ code {
     @apply bg-background text-foreground;}
   html {
     @apply font-sans;}}
+
+form {
+  border: none !important;
+  border-width: 0px !important;
+  box-shadow: none !important;
+  outline: none !important;
+}

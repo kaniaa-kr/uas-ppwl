@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+html, body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -73,7 +80,6 @@
 
 #next-steps {
   display: flex;
-  border-top: 1px solid var(--border);
   text-align: left;
 
   & > div {
@@ -97,11 +103,11 @@
 }
 
 #docs {
-  border-right: 1px solid var(--border);
+  border-right: none;
 
   @media (max-width: 1024px) {
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 }
 
