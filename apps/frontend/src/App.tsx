@@ -1,13 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import { Toaster } from "sonner"
-import LoginPage from "./pages/LoginPage"
-import RegisterPage from "./pages/RegisterPage"
 import HomePage from "./pages/HomePage"
-import PostDetailPage from "./pages/PostDetailPage"
-import ProtectedRoute from "./components/ProtectedRoute"
 
+// Halaman penampung sementara untuk fitur di luar tanggung jawab Anda
 const PlaceholderPage = ({ name }: { name: string }) => (
-  <div className="flex items-center justify-center h-screen">
+  <div className="flex items-center justify-center h-screen bg-gray-50">
     <div className="text-center">
       <h1 className="text-3xl font-bold mb-2">🚧</h1>
       <p className="text-gray-500">
@@ -22,32 +19,14 @@ export default function App() {
     <BrowserRouter>
       <Toaster position="top-center" richColors />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/post/:id"
-          element={
-            <ProtectedRoute>
-              <PostDetailPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/notifications"
-          element={
-            <ProtectedRoute>
-              <PlaceholderPage name="Notifikasi" />
-            </ProtectedRoute>
-          }
-        />
+        {/* Rute Beranda milik Anda - Terisolasi total dan aman dari error Auth */}
+        <Route path="/" element={<HomePage />} />
+
+        {/* Mengarahkan rute lain ke halaman penampung sementara */}
+        <Route path="/login" element={<PlaceholderPage name="Login" />} />
+        <Route path="/register" element={<PlaceholderPage name="Register" />} />
+        <Route path="/post/:id" element={<PlaceholderPage name="Detail Postingan" />} />
+        <Route path="/notifications" element={<PlaceholderPage name="Notifikasi" />} />
       </Routes>
     </BrowserRouter>
   )
