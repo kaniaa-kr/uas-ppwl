@@ -1,15 +1,15 @@
-import "dotenv/config"
 import { Elysia } from "elysia"
 import { cors } from "@elysiajs/cors"
 import { PrismaClient } from "@prisma/client"
 import { Pool } from "pg"
 import { PrismaPg } from "@prisma/adapter-pg"
-import { authRoutes } from "./routes/auth"
-import { postRoutes } from "./routes/posts"
-import { commentRoutes } from "./routes/comments"
-import { notifRoutes } from "./routes/notifications"
 
-// Setup Prisma dengan Adapter PostgreSQL (wajib untuk Prisma v7)
+// MENGISOLASI RUTE TIM LAIN YANG BELUM SELESAI
+// import { authRoutes } from "./routes/auth"
+import { postRoutes } from "./routes/posts"
+// import { commentRoutes } from "./routes/comments"
+// import { notifRoutes } from "./routes/notifications"
+
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
   throw new Error("DATABASE_URL tidak ditemukan di .env!")
@@ -24,10 +24,10 @@ export const prisma = new PrismaClient({ adapter })
 
 const app = new Elysia()
   .use(cors({ origin: "*" }))
-  .use(authRoutes)
-  .use(postRoutes)
-  .use(commentRoutes)
-  .use(notifRoutes)
+  // .use(authRoutes)       <-- Dimatikan sementara
+  .use(postRoutes)       // <-- Hanya rute Evan yang menyala
+  // .use(commentRoutes)    <-- Dimatikan sementara
+  // .use(notifRoutes)      <-- Dimatikan sementara
   .get("/users", async ({ query, set }) => {
     if (query.key !== process.env.SECRET_KEY) {
       set.status = 401
