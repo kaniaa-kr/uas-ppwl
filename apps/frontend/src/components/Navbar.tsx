@@ -1,98 +1,78 @@
-import { useState } from "react"
-import { Home, Bell, Film, Compass, MessageCircle, User } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
-import { useNotificationStore } from "../stores/notification.store"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuthStore } from "../stores/auth.store"
-import NotificationPanel from "./NotificationPanel"
+import { Bell, LogOut, Home } from "lucide-react"
+import { toast } from "sonner"
 
 export default function Navbar() {
-  const location = useLocation()
-  const { unreadCount } = useNotificationStore()
-  const { user, logout } = useAuthStore()
-  const [showNotif, setShowNotif] = useState(false)
+  const user = useAuthStore((s) => s.user)
+  const logout = useAuthStore((s) => s.logout)
+  const navigate = useNavigate()
 
-  const navItems = [
-    { icon: Home, label: "Beranda", to: "/" },
-    { icon: Compass, label: "Jelajahi", to: "/explore" },
-    { icon: Film, label: "Reels", to: "/reels" },
-    { icon: MessageCircle, label: "Pesan", to: "/messages" },
-  ]
-
-  const sidebarWidth = showNotif ? "w-20" : "w-64"
+  const handleLogout = () => {
+    logout()
+    toast.success("Logout berhasil")
+    navigate("/login")
+  }
 
   return (
-    <>
-      <aside
-        className={`fixed top-0 left-0 h-screen ${sidebarWidth} border-r bg-white flex flex-col px-3 py-6 z-40 transition-all duration-300`}
-      >
-        <div className="px-3 mb-8 overflow-hidden">
-          <span className="font-bold text-xl">📷</span>
-        </div>
+    <nav className="bg-white border-b sticky top-0 z-50 shadow-sm">
+      <div className="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <Link
+          to="/"
+          className="text-2xl font-bold flex items-center gap-2 hover:opacity-75 transition"
+        >
+          📸 <span className="text-lg">InstaClone</span>
+        </Link>
 
-        <nav className="flex flex-col gap-1">
-          {navItems.map(({ icon: Icon, label, to }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-gray-100 transition text-sm font-medium ${
-                location.pathname === to ? "font-bold" : ""
-              }`}
-            >
-              <Icon size={24} className="flex-shrink-0" />
-              {!showNotif && <span>{label}</span>}
-            </Link>
-          ))}
-
-          <button
-            onClick={() => setShowNotif((prev) => !prev)}
-            className={`flex items-center gap-4 px-3 py-3 rounded-xl hover:bg-gray-100 transition text-sm font-medium w-full text-left ${
-              showNotif ? "bg-gray-100 font-bold" : ""
-            }`}
-          >
-            <div className="relative flex-shrink-0">
-              <Bell size={24} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                  {unreadCount}
-                </span>
-              )}
-            </div>
-            {!showNotif && <span>Notifikasi</span>}
-          </button>
-        </nav>
-
-        <div className="mt-auto flex flex-col gap-2 px-3">
+        {/* Actions */}
+        <div className="flex items-center gap-4">
+          {/* Home */}
           <Link
-            to="/profile"
-            className="flex items-center gap-3 py-3 rounded-xl hover:bg-gray-100 transition"
+            to="/"
+            className="text-gray-600 hover:text-blue-500 transition"
+            title="Beranda"
           >
-            {user?.avatarUrl ? (
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <User size={24} className="flex-shrink-0" />
-            )}
-            {!showNotif && (
-              <span className="text-sm font-medium">{user?.name ?? "Profil"}</span>
-            )}
+            <Home size={24} />
           </Link>
-          {!showNotif && (
-            <button
-              onClick={logout}
-              className="text-sm text-red-500 hover:text-red-700 text-left px-1"
-            >
-              Logout
-            </button>
-          )}
-        </div>
-      </aside>
 
-      {showNotif && (
-        <NotificationPanel onClose={() => setShowNotif(false)} />
-      )}
-    </>
+          {/* Notifications */}
+          <Link
+            to="/notifications"
+            className="text-gray-600 hover:text-red-500 transition relative"
+            title="Notifikasi"
+          >
+            <Bell size={24} />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              3
+            </span>
+          </Link>
+
+          {/* User Menu */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1 hover:bg-gray-200 transition">
+            <img
+              src={
+                user?.avatar_url ||
+                `https://ui-avatars.com/api/?name=${user?.name}`
+              }
+              alt="avatar"
+              className="w-6 h-6 rounded-full object-cover"
+            />
+            <span className="text-sm font-semibold hidden sm:inline">
+              {user?.name}
+            </span>
+          </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="text-red-500 hover:text-red-700 transition"
+            title="Logout"
+          >
+            <LogOut size={20} />
+          </button>
+        </div>
+      </div>
+    </nav>
   )
 }

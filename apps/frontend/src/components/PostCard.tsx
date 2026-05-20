@@ -1,61 +1,78 @@
-import { Heart, MessageCircle } from "lucide-react"
+import { Link } from "react-router-dom"
+import { Heart, MessageCircle, Share2 } from "lucide-react"
 
-export default function PostCard({ post }: { post: any }) {
-  // Fallback data jika nama atau avatar kosong di database
-  const username = post.user?.username || post.user?.name || "user_instagram"
-  const avatar = post.user?.avatar_url || "https://github.com/shadcn.png"
+type PostCardProps = {
+  id: string
+  content: string
+  image_url?: string
+  user: {
+    name: string
+    username: string
+    avatar_url?: string
+  }
+  likes: number
+  comments: number
+}
 
+export default function PostCard({
+  id,
+  content,
+  image_url,
+  user,
+  likes,
+  comments,
+}: PostCardProps) {
   return (
-    <article className="border border-[#DBDBDB] bg-[#FFFFFF] rounded-md mb-6 w-full shadow-none">
-
-      {/* HEADER PROFILE */}
-      <div className="flex items-center p-4">
+    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition">
+      {/* Header */}
+      <div className="flex items-center gap-3 p-4">
         <img
-          src={avatar}
-          alt={`${username}'s avatar`}
-          className="w-8 h-8 rounded-full mr-3 border border-gray-200 object-cover"
+          src={
+            user.avatar_url ||
+            `https://ui-avatars.com/api/?name=${user.name}`
+          }
+          alt={user.name}
+          className="w-10 h-10 rounded-full object-cover"
         />
-        <span className="font-semibold text-sm text-[#262626]">{username}</span>
+        <div className="flex-1">
+          <p className="font-semibold text-sm">{user.name}</p>
+          <p className="text-xs text-gray-400">@{user.username}</p>
+        </div>
       </div>
 
-      {/* KONTEN VISUAL (Content First) */}
-      <div className="bg-gray-50 w-full aspect-square flex items-center justify-center border-y border-gray-100 text-gray-400">
-        {post.image_url ? (
-          <img src={post.image_url} alt="Post content" className="w-full h-full object-cover" />
-        ) : (
-          <span className="text-xs">Tidak ada media gambar</span>
-        )}
-      </div>
+      {/* Gambar */}
+      {image_url && (
+        <img
+          src={image_url}
+          alt="post"
+          className="w-full aspect-square object-cover"
+        />
+      )}
 
-      {/* AREA AKSI & INFORMASI POSTINGAN */}
+      {/* Konten */}
       <div className="p-4">
-        {/* Tombol Interaksi Utama */}
-        <div className="flex space-x-4 mb-3">
-          <button className="text-[#262626] hover:text-gray-400 transition-colors cursor-pointer">
-            <Heart size={24} />
-          </button>
-          <button className="text-[#262626] hover:text-gray-400 transition-colors cursor-pointer">
-            <MessageCircle size={24} />
-          </button>
-        </div>
-
-        {/* Total Likes */}
-        <div className="text-sm font-semibold text-[#262626] mb-2">
-          {post._count?.likes || 0} Likes
-        </div>
-
-        {/* Caption Postingan */}
-        <div className="text-sm text-[#262626] leading-relaxed">
-          <span className="font-semibold mr-2">{username}</span>
-          {post.content || ""}
-        </div>
-
-        {/* Pemicu List Komentar */}
-        <div className="text-xs text-gray-500 mt-2 cursor-pointer hover:underline">
-          Lihat semua {post._count?.comments || 0} komentar
-        </div>
+        <p className="text-sm text-gray-800 line-clamp-3">{content}</p>
       </div>
 
-    </article>
+      {/* Footer: Actions */}
+      <div className="px-4 pb-4 flex items-center gap-4 text-gray-500 border-t">
+        <button className="flex items-center gap-1 hover:text-red-500 transition py-2 flex-1 justify-center">
+          <Heart size={20} />
+          <span className="text-sm font-semibold">{likes}</span>
+        </button>
+
+        <Link
+          to={`/post/${id}`}
+          className="flex items-center gap-1 hover:text-blue-500 transition py-2 flex-1 justify-center"
+        >
+          <MessageCircle size={20} />
+          <span className="text-sm font-semibold">{comments}</span>
+        </Link>
+
+        <button className="flex items-center gap-1 hover:text-green-500 transition py-2 flex-1 justify-center">
+          <Share2 size={20} />
+        </button>
+      </div>
+    </div>
   )
 }

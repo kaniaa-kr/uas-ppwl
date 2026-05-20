@@ -1,81 +1,92 @@
 import { useEffect, useState } from "react"
 import Navbar from "../components/Navbar"
 import PostCard from "../components/PostCard"
+import { toast } from "sonner"
+
+type Post = {
+  id: string
+  content: string
+  image_url?: string
+  created_at: string
+  user: {
+    id: string
+    name: string
+    username: string
+    avatar_url?: string
+  }
+  _count: {
+    likes: number
+    comments: number
+  }
+}
+
+const API_URL = import.meta.env.VITE_API_URL
 
 export default function HomePage() {
-  const [posts, setPosts] = useState([])
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+
+  const fetchPosts = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/posts`)
+      if (!res.ok) throw new Error("Gagal fetch posts")
+      const data = await res.json()
+      setPosts(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error("Error fetching posts:", error)
+      toast.error("Gagal memuat postingan")
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchBeranda = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/posts")
-        if (!response.ok) throw new Error("Gagal mengambil data beranda dari server")
-
-        const result = await response.json()
-
-        // Proteksi ekstra: Pastikan result sukses dan result.data adalah array yang valid
-        if (result && result.success && Array.isArray(result.data)) {
-          setPosts(result.data)
-        } else {
-          // Jika backend mengirim success: false atau error object, tangkap di sini
-          setError(result.message || "Gagal memuat kiriman dari server")
-          setPosts([]) // Amankan state dengan array kosong agar tidak crash
-        }
-      } catch (err) {
-        setError("Koneksi gagal. Pastikan server backend Anda sudah dinyalakan di port 3000")
-        setPosts([]) // Amankan state
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchBeranda()
+    fetchPosts()
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#FFFFFF]">
-      {/* Navigasi Atas */}
+    <>
       <Navbar />
+      <div className="max-w-lg mx-auto px-4 py-6">
+        {/* Pull-to-refresh hint */}
+        <div className="text-center text-gray-400 text-xs mb-4">
+          📱 Geser ke bawah untuk refresh
+        </div>
 
-      {/* Kontainer Utama (Mobile-First Approach) */}
-      <main className="max-w-lg mx-auto pt-6 px-4 sm:px-0 pb-24">
-
-        {/* 1. Loading State */}
+        {/* Loading */}
         {loading && (
-          <p className="text-center text-sm text-gray-500 mt-12 animate-pulse">
-            Memuat beranda...
-          </p>
-        )}
-
-        {/* 2. Error Handling State */}
-        {error && (
-          <div className="text-center mt-12 p-4 border border-red-200 bg-red-50 rounded-md">
-            <p className="text-sm text-red-600 font-medium">{error}</p>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
           </div>
         )}
 
-        {/* 3. Empty State (Jika array database merespons [] kosong atau setelah fallback) */}
+        {/* Empty state */}
         {!loading && posts.length === 0 && (
-          <div className="text-center mt-12 p-8 border border-dashed border-gray-300 rounded-md">
-            <p className="text-sm text-gray-500">
-              Belum ada postingan di beranda. Database kosong atau belum di-seed.
+          <div className="text-center py-12">
+            <p className="text-2xl mb-2">📭</p>
+            <p className="text-gray-400">Belum ada postingan</p>
+            <p className="text-sm text-gray-300 mt-1">
+              Jadilah yang pertama posting!
             </p>
           </div>
         )}
 
-        {/* 4. Render Feed Utama (Menggunakan safe guard &&) */}
-        {!loading && posts && posts.length > 0 && (
-          <div className="w-full flex flex-col">
-            {posts.map((post: any) => (
-              // Pastikan data post memiliki ID yang unik, atau fallback ke index jika terpaksa
-              <PostCard key={post?.id} post={post} />
-            ))}
-          </div>
-        )}
-
-      </main>
-    </div>
+        {/* Posts feed */}
+        <div className="flex flex-col gap-6">
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              id={post.id}
+              content={post.content}
+              image_url={post.image_url}
+              user={post.user}
+              likes={post._count.likes}
+              comments={post._count.comments}
+            />
+          ))}
+        </div>
+      </div>
+    </>
   )
 }

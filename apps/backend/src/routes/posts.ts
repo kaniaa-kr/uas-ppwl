@@ -1,62 +1,79 @@
 import { Elysia } from "elysia"
-import { prisma } from "../index" // Mengimpor instance Prisma dari entry point utama
+import { prisma } from "../index"
 
 export const postRoutes = new Elysia({ prefix: "/posts" })
-  // Endpoint GET /posts - Menampilkan semua postingan untuk beranda
-  .get("/", async () => {
-    try {
-      const posts = await prisma.post.findMany({
-        orderBy: { created_at: "desc" }, // Mengurutkan dari postingan paling baru
-        include: {
-          user: {
-            select: { id: true, name: true, username: true, avatar_url: true }
-          },
-          _count: {
-            select: { likes: true, comments: true }
-          }
-        }
-      })
 
-      return { success: true, data: posts }
-    } catch (error) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          message: "Gagal mengambil data beranda",
-          error: String(error)
-        }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      )
-    }
+  // ====== GET /posts ======
+  // Ambil semua postingan untuk halaman beranda
+  .get("/", async () => {
+    const posts = await prisma.post.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar_url: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+      },
+      orderBy: { created_at: "desc" },
+      take: 20,
+    })
+
+    // Convert BigInt ke string agar bisa di-JSON-kan
+    return posts.map((p) => ({
+      ...p,
+      id: p.id.toString(),
+      user_id: p.user_id.toString(),
+      user: {
+        ...p.user,
+        id: p.user.id.toString(),
+      },
+    }))
   })
 
-  // Endpoint GET /posts/:id - Menampilkan detail spesifik 1 postingan
-  .get("/:id", async ({ params: { id } }) => {
-    try {
-      const post = await prisma.post.findUnique({
-        where: { id: String(id) },
-        include: {
-          user: {
-            select: { id: true, name: true, username: true, avatar_url: true }
+  // ====== GET /posts/:id ======
+  // Ambil detail 1 postingan
+  .get("/:id", async ({ params, set }) => {
+    const post = await prisma.post.findUnique({
+      where: { id: BigInt(params.id) },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar_url: true,
           },
-          _count: {
-            select: { likes: true, comments: true }
-          }
-        }
-      })
+        },
+        _count: {
+          select: {
+            likes: true,
+            comments: true,
+          },
+        },
+      },
+    })
 
-      if (!post) {
-        return new Response(
-          JSON.stringify({ success: false, message: "Postingan tidak ditemukan" }),
-          { status: 404, headers: { "Content-Type": "application/json" } }
-        )
-      }
+    if (!post) {
+      set.status = 404
+      return { error: "Post tidak ditemukan" }
+    }
 
-      return { success: true, data: post }
-    } catch (error) {
-      return new Response(
-        JSON.stringify({ success: false, message: "Terjadi kesalahan pada server" }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      )
+    return {
+      ...post,
+      id: post.id.toString(),
+      user_id: post.user_id.toString(),
+      user: {
+        ...post.user,
+        id: post.user.id.toString(),
+      },
     }
   })
