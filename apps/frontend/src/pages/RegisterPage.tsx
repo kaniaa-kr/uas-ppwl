@@ -63,7 +63,12 @@ export default function RegisterPage() {
 
       setAuth(data.user, data.accessToken)
       toast.success(`Akun berhasil dibuat! Selamat datang, ${data.user.name}! 🎉`)
-      navigate("/")
+      
+      // 🌟 PENAMBAHAN: Menunda navigasi ke halaman utama selama 2 detik (2000ms)
+      setTimeout(() => {
+        navigate("/")
+      }, 2000)
+
     } catch (error) {
       console.error("Register error:", error)
       toast.error("Terjadi kesalahan sistem atau jaringan")
@@ -78,7 +83,7 @@ export default function RegisterPage() {
 
   return (
     // Pembungkus luar aplikasi utama - Polos putih total
-    <div className="w-full min-h-screen bg-white flex flex-col font-sans text-black overflow-x-hidden antialiased">
+    <div className="w-full min-h-screen bg-white font-sans text-black overflow-x-hidden antialiased">
 
       {/* 🛠️ TRiK PAMUNGKAS: Membunuh paksa border template bawaan dari CSS global khusus untuk halaman ini */}
       <style>{`
@@ -91,7 +96,50 @@ export default function RegisterPage() {
           border: none !important; 
           height: 0px !important; 
         }
+
+        /* ── FLOATING LABEL ── */
+        .input-wrapper {
+          position: relative;
+          width: 100%;
+        }
+        .input-wrapper label {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          transition: all 0.15s ease-out;
+          background: white;
+          padding: 0 4px;
+          font-size: 14px;
+          color: #9ca3af;
+          font-weight: normal;
+        }
+        .input-wrapper input:focus ~ label,
+        .input-wrapper input:not(:placeholder-shown) ~ label {
+          top: 12px;
+          transform: translateY(-50%) scale(0.8);
+          color: #737373;
+          transform-origin: left center;
+        }
+
+        /* ── EFEK HOVER & FOCUS INPUT REGISTRASI ── */
+        .reg-input {
+          transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+        .reg-input:hover:not(:focus):not(:disabled) {
+          border-color: #9ca3af !important;
+        }
+        .reg-input:focus {
+          border-color: #0095f6 !important;
+          background-color: transparent !important;
+          outline: none !important;
+        }
+        .reg-input:focus::placeholder {
+          color: transparent !important;
+        }
       `}</style>
+    
 
       {/* Kontainer tengah - Bersih tanpa border vertikal/samping */}
       <div className="flex-1 flex flex-col items-center justify-start pt-6 pb-6 w-full bg-white box-border">
@@ -121,12 +169,12 @@ export default function RegisterPage() {
               className="h-[30px] w-auto object-contain block"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <span className="text-[17px] font-bold tracking-tight text-gray-400 uppercase leading-none" style={{ marginTop: "1px" }}>
+            <span className="text-[17px] font-bold tracking-tight text-gray-600 uppercase leading-none" style={{ marginTop: "1px" }}>
               Meta
             </span>
           </div>
 
-          {/* Judul Halaman - 🌟 DIKECILKAN DIKIT: Ukuran teks disesuaikan agar lebih proporsional */}
+          {/* Judul Halaman */}
           <div className="w-full text-left mb-5">
             <h5 className="text-[26px] font-bold tracking-tight text-black mb-1.5 leading-tight">
               Get started on Instagram
@@ -136,27 +184,30 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* Form Utama (Bebas border luar) */}
+          {/* Form Utama */}
           <form
             onSubmit={handleRegister}
             className="w-full flex flex-col gap-[15px] box-border border-0 border-transparent shadow-none outline-none"
             style={{ border: 'none', borderWidth: '0px', boxShadow: 'none' }}
           >
 
-            {/* 1. Mobile number or email - 🌟 DIKECILKAN DIKIT: Menggunakan text-[14px] dan py-3 */}
+            {/* 1. Mobile number or email */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <label className="text-[17px] font-semibold text-black">Mobile number or email</label>
-              <input
-                name="email"
-                type="text"
-                disabled={loading}
-                placeholder="Mobile number or email"
-                value={form.email}
-                onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-200 rounded-[12px] text-[14px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition box-border"
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  name="email"
+                  type="text"
+                  disabled={loading}
+                  placeholder=" "
+                  value={form.email}
+                  onChange={handleChange}
+                  onKeyPress={handleKeyPress}
+                  className="reg-input w-full px-4 pt-5 pb-2 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black disabled:bg-gray-50 box-border"
+                  required
+                />
+                <label>Mobile number or email</label>
+              </div>
             </div>
 
             {/* Catatan Info Kontak */}
@@ -167,24 +218,26 @@ export default function RegisterPage() {
             {/* 2. Password */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <label className="text-[17px] font-semibold text-black">Password</label>
-              <input
-                name="password"
-                type="password"
-                disabled={loading}
-                placeholder="Password"
-                value={form.password}
-                onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-200 rounded-[12px] text-[14px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition box-border"
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  name="password"
+                  type="password"
+                  disabled={loading}
+                  placeholder=" "
+                  value={form.password}
+                  onChange={handleChange}
+                  onKeyPress={handleKeyPress}
+                  className="reg-input w-full px-4 pt-5 pb-2 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black disabled:bg-gray-50 box-border"
+                  required
+                />
+                <label>Password</label>
+              </div>
             </div>
 
-            {/* 3. Birthday - KODE YANG SUDAH DIPERBARUI TOTAL */}
+            {/* 3. Birthday */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <div className="flex items-center gap-1">
                 <label className="text-[17px] font-semibold text-black">Birthday</label>
-                {/* 🌟 SEKARANG: Menggunakan Tanda Tanya Dalam Lingkaran (SVG) */}
                 <div style={{ display: "inline-flex", alignItems: "center", cursor: "help", marginLeft: "2px" }}>
                   <svg 
                     width="14" 
@@ -211,13 +264,12 @@ export default function RegisterPage() {
                     value={birthdayUi.month}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, month: e.target.value }))}
-                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.month ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.month ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
                     <option value="" className="text-gray-400">Month</option>
                     {months.map((m) => <option key={m} value={m} className="text-black">{m}</option>)}
                   </select>
-                  {/* Chevron Panah Halus */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -231,13 +283,12 @@ export default function RegisterPage() {
                     value={birthdayUi.day}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, day: e.target.value }))}
-                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.day ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.day ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
                     <option value="" className="text-gray-400">Day</option>
                     {days.map((d) => <option key={d} value={d} className="text-black">{d}</option>)}
                   </select>
-                  {/* Chevron Panah Halus */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -251,13 +302,12 @@ export default function RegisterPage() {
                     value={birthdayUi.year}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, year: e.target.value }))}
-                    className={`w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white focus:outline-none box-border cursor-pointer ${birthdayUi.year ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.year ? 'text-black' : 'text-gray-400'}`}
                     required
                   >
                     <option value="" className="text-gray-400">Year</option>
                     {years.map((y) => <option key={y} value={y} className="text-black">{y}</option>)}
                   </select>
-                  {/* Chevron Panah Halus */}
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -271,33 +321,39 @@ export default function RegisterPage() {
             {/* 4. Name */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <label className="text-[17px] font-semibold text-black">Name</label>
-              <input
-                name="name"
-                type="text"
-                disabled={loading}
-                placeholder="Full name"
-                value={form.name}
-                onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-200 rounded-[12px] text-[14px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition box-border"
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  name="name"
+                  type="text"
+                  disabled={loading}
+                  placeholder=" "
+                  value={form.name}
+                  onChange={handleChange}
+                  onKeyPress={handleKeyPress}
+                  className="reg-input w-full px-4 pt-5 pb-2 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black disabled:bg-gray-50 box-border"
+                  required
+                />
+                <label>Full name</label>
+              </div>
             </div>
 
             {/* 5. Username */}
             <div className="flex flex-col text-left gap-1 w-full box-border">
               <label className="text-[17px] font-semibold text-black">Username</label>
-              <input
-                name="username"
-                type="text"
-                disabled={loading}
-                placeholder="Username"
-                value={form.username}
-                onChange={handleChange}
-                onKeyPress={handleKeyPress}
-                className="w-full px-4 py-3 border border-gray-200 rounded-[12px] text-[14px] focus:outline-none focus:border-gray-400 bg-white placeholder-gray-400 text-black disabled:bg-gray-50 transition box-border"
-                required
-              />
+              <div className="input-wrapper">
+                <input
+                  name="username"
+                  type="text"
+                  disabled={loading}
+                  placeholder=" "
+                  value={form.username}
+                  onChange={handleChange}
+                  onKeyPress={handleKeyPress}
+                  className="reg-input w-full px-4 pt-5 pb-2 border border-gray-200 rounded-[12px] text-[14px] bg-white text-black disabled:bg-gray-50 box-border"
+                  required
+                />
+                <label>Username</label>
+              </div>
             </div>
 
             {/* Kebijakan / Legalities */}
@@ -317,7 +373,7 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Tombol Aksi - 🌟 DIKECILKAN DIKIT: py-2.5 dan text-[13.5px] kembali ke ukuran semula yang ideal */}
+            {/* Tombol Aksi */}
             <div className="flex flex-col gap-3 mt-2 w-full">
               <button
                 type="submit"
@@ -338,76 +394,66 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Footer Bawah - Tanpa Border Atas */}
       {/* FOOTER */}
-        <footer style={{
-          width: "100%",
-          background: "#ffffff",
-          padding: "24px 0",
-          boxSizing: "border-box",
-          borderTop: "1px solid #f1f1f1"
-        }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
-              {["Meta","About","Blog","Jobs","Help","API","Privacy","Terms","Locations","Popular","Instagram Lite","Meta AI","Threads","Contact Uploading & Non-Users","Meta Verified","Meta in Indonesia"].map((item) => (
-                <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
-                  {item}
-                </a>
-              ))}
-            </div>
+      <footer style={{
+        width: "100%",
+        background: "#ffffff",
+        padding: "24px 0"
+      }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
+            {["Meta","About","Blog","Jobs","Help","API","Privacy","Terms","Locations","Popular","Instagram Lite","Meta AI","Threads","Contact Uploading & Non-Users","Meta Verified","Meta in Indonesia"].map((item) => (
+              <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
+                {item}
+              </a>
+            ))}
+          </div>
+          
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0px", fontSize: "12px", color: "#737373" }}>
             
-            {/* 🌟 PENYESUAIAN TOTAL: Menggunakan gap 0px agar teks bahasa, panah, dan copyright saling merapat sempurna */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0px", fontSize: "12px", color: "#737373" }}>
+            <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
+              <select 
+                defaultValue="en"
+                style={{
+                  fontSize: "12px",
+                  color: "#737373",
+                  background: "transparent",
+                  border: "none",
+                  width: "42px",
+                  padding: "0px",
+                  cursor: "pointer",
+                  outline: "none",
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none"
+                }}
+                onChange={(e) => {
+                  console.log("Bahasa diganti ke:", e.target.value);
+                }}
+              >
+                <option value="en">English</option>
+                <option value="id">Bahasa Indonesia</option>
+                <option value="ms">Bahasa Melayu</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="ja">日本語</option>
+              </select>
               
-              {/* Dropdown Bahasa Interaktif */}
-              <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
-                <select 
-                  defaultValue="en"
-                  style={{
-                    fontSize: "12px",
-                    color: "#737373",
-                    background: "transparent",
-                    border: "none",
-                    width: "42px", // Memangkas paksa sisa space kosong di kanan kata "English"
-                    padding: "0px",
-                    cursor: "pointer",
-                    outline: "none",
-                    appearance: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "none"
-                  }}
-                  onChange={(e) => {
-                    console.log("Bahasa diganti ke:", e.target.value);
-                  }}
-                >
-                  <option value="en">English</option>
-                  <option value="id">Bahasa Indonesia</option>
-                  <option value="ms">Bahasa Melayu</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="ja">日本語</option>
-                </select>
-                
-                {/* Icon Panah Kecil (Chevron) Gaya Instagram */}
-                <svg 
-                  width="10" 
-                  height="10" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="#737373" 
-                  strokeWidth="2.5" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                  style={{ pointerEvents: "none", marginLeft: "2px" }}
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-              </div>
+              <svg 
+                width="10" 
+                height="10" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="#737373" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                style={{ pointerEvents: "none", marginLeft: "2px" }}
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
 
-              {/* Teks Copyright dengan Jarak yang Diatur Manis lewat Margin */}
-              <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
-
-            {/* Teks Copyright dengan Jarak Merapat Nyaman */}
             <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
 
           </div>

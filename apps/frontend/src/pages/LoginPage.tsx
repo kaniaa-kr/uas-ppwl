@@ -19,6 +19,9 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
   const [searchParams] = useSearchParams()
   const setAuth = useAuthStore((state) => state.setAuth)
 
+  // Tombol aktif hanya jika kedua field terisi
+  const isFormValid = email.trim() !== "" && password.trim() !== ""
+
   // ==========================================
   // OTOMATISASI PASCA-LOGIN GOOGLE OAUTH
   // ==========================================
@@ -66,49 +69,44 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
     setIsLoading(true);
 
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    setTimeout(async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
-      const response = await fetch(`${apiUrl}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setAuth(
-          {
-            id: data.user.id,
-            name: data.user.name,
-            email: data.user.email,
-            username: data.user.username,
-            avatar_url: data.user.avatar_url || undefined,
-          },
-          data.accessToken
-        );
-
-        toast.success(`Selamat datang kembali, ${data.user.name}! 👋`, {
-          duration: 4000,
+        const response = await fetch(`${apiUrl}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
         });
 
-        if (onLoginSuccess) onLoginSuccess();
-        navigate('/');
-      } else {
-        toast.error(data.error || 'Login gagal. Periksa kembali akun Anda.');
+        const data = await response.json();
+
+        if (response.ok) {
+          setAuth(
+            {
+              id: data.user.id,
+              name: data.user.name,
+              email: data.user.email,
+              username: data.user.username,
+              avatar_url: data.user.avatar_url || undefined,
+            },
+            data.accessToken
+          );
+
+          toast.success(`Selamat datang kembali, ${data.user.name}! 👋`, { duration: 4000 });
+
+          if (onLoginSuccess) onLoginSuccess();
+          navigate('/');
+        } else {
+          toast.error(data.error || 'Login gagal. Periksa kembali akun Anda.');
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Terjadi kesalahan jaringan atau backend offline.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error(error);
-      toast.error('Terjadi kesalahan jaringan atau backend offline.');
-    } finally {
-      setIsLoading(false);
-    }
+    }, 500);
   };
 
   return (
@@ -132,47 +130,85 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           height: 0 !important;
         }
 
+        /* ── FLOATING LABEL ── */
+        .input-wrapper {
+          position: relative;
+          width: 100%;
+        }
+        .input-wrapper label {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          transition: all 0.15s ease-out;
+          background: white;
+          padding: 0 4px;
+          font-size: 14px;
+          color: #9ca3af;
+          font-weight: normal;
+        }
+        .input-wrapper input:focus ~ label,
+        .input-wrapper input:not(:placeholder-shown) ~ label {
+          top: 12px;
+          transform: translateY(-50%) scale(0.8);
+          color: #737373;
+          transform-origin: left center;
+        }
+
         .custom-input {
           width: 100%;
           font-size: 14px;
-          padding: 14px 16px;
-          border: 1px solid #e5e7eb;
+          padding: 20px 16px 8px 16px;
+          border: 1.5px solid #e5e7eb;
           border-radius: 16px;
           background: #ffffff;
           outline: none;
           color: #1f2937;
           box-sizing: border-box;
-          transition: border-color 0.2s;
+          transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+        .custom-input:hover:not(:focus) {
+          border-color: #9ca3af;
         }
         .custom-input:focus {
-          border-color: #3b82f6;
+          border-color: #0095f6 !important;
+          background-color: transparent !important;
+          box-shadow: 0 0 0 3px rgba(71, 150, 236, 0.15);
         }
         .custom-input::placeholder {
-          color: #9ca3af;
+          color: transparent;
+        }
+        .custom-input:focus::placeholder {
+          color: transparent;
         }
 
+        /* ── TOMBOL LOGIN: aktif vs nonaktif ── */
         .btn-primary {
           width: 100%;
           padding: 14px 0;
-          background: #4796ec;
           color: white;
           font-size: 14px;
           font-weight: 600;
           border: none;
           border-radius: 9999px;
-          cursor: pointer;
-          transition: background 0.2s;
           margin-top: 8px;
           display: flex;
           justify-content: center;
           align-items: center;
+          transition: background 0.2s, opacity 0.2s;
         }
-        .btn-primary:hover {
+        .btn-primary:not(:disabled) {
+          background: #4796ec;
+          cursor: pointer;
+        }
+        .btn-primary:not(:disabled):hover {
           background: #2563eb;
         }
         .btn-primary:disabled {
-          opacity: 0.7;
+          background: #b2d4f7;
           cursor: not-allowed;
+          opacity: 1;
         }
 
         .btn-google-login {
@@ -222,6 +258,18 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           color: transparent;
           display: inline-block;
         }
+        footer {
+        width: 100% !important;
+        max-width: 100vw !important;
+        margin-top: 0px !important; /* Menghilangkan jarak kosong di atas footer */
+        padding-top: 12px !important; /* Merapatkan teks menu ke batas atas footer */
+        box-sizing: border-border;
+  }
+      footer > div {
+      width: 100% !important;
+      max-width: 1000px !important; /* Membatasi lebar menu agar rapi di tengah */
+      margin: 0 auto !important; /* Memaksa footer berada di tengah-tengah layar */
+  }
       `}</style>
 
       {/* ROOT FULLSCREEN CONTAINER */}
@@ -239,7 +287,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         <div style={{
           flex: 1,
           display: "grid",
-          gridTemplateColumns: "1fr 640px", /* 🌟 DILEBARKAN LAGI: Dari 580px dinaikkan ke 640px */
+          gridTemplateColumns: "1fr 640px",
           width: "100%",
           overflow: "hidden"
         }}>
@@ -277,29 +325,21 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             </h1>
 
             <div style={{ position: "relative", width: "560px", height: "450px", marginTop: "10px" }}>
-              {/* Gambar Kiri (Miring) */}
+              {/* Gambar Kiri */}
               <div style={{
-                position: "absolute",
-                width: "215px",
-                height: "340px",
-                left: "10px",
-                bottom: "10px",
-                transform: "rotate(-12deg)", zIndex: 10,
-                borderRadius: "24px", overflow: "hidden",
-                boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+                position: "absolute", width: "215px", height: "340px",
+                left: "10px", bottom: "10px", transform: "rotate(-12deg)", zIndex: 10,
+                borderRadius: "24px", overflow: "hidden", boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
               }}>
                 <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 <div style={{ position: "absolute", bottom: 16, left: 16, width: 28, height: 28, background: "#ff3040", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>❤️</div>
               </div>
 
-              {/* Gambar Tengah (Utama / Paling Depan) */}
+              {/* Gambar Tengah */}
               <div style={{
-                position: "absolute",
-                width: "265px",
-                height: "410px",
+                position: "absolute", width: "265px", height: "410px",
                 left: "50%", transform: "translateX(-50%)", top: "0px", zIndex: 30,
-                borderRadius: "28px", overflow: "hidden",
-                border: "4px solid white",
+                borderRadius: "28px", overflow: "hidden", border: "4px solid white",
                 boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
               }}>
                 <img src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?w=400&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -312,16 +352,11 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                 </div>
               </div>
 
-              {/* Gambar Kanan (Miring) */}
+              {/* Gambar Kanan */}
               <div style={{
-                position: "absolute",
-                width: "215px",
-                height: "340px",
-                right: "10px",
-                bottom: "20px",
-                transform: "rotate(10deg)", zIndex: 20,
-                borderRadius: "24px", overflow: "hidden",
-                boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
+                position: "absolute", width: "215px", height: "340px",
+                right: "10px", bottom: "20px", transform: "rotate(10deg)", zIndex: 20,
+                borderRadius: "24px", overflow: "hidden", boxShadow: "0 12px 24px rgba(0,0,0,0.15)",
               }}>
                 <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80" alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 <div style={{ position: "absolute", top: 12, right: 12, width: 26, height: 26, background: "#00de65", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "white", fontWeight: "bold" }}>★</div>
@@ -341,7 +376,6 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             boxSizing: "border-box",
             height: "100%"
           }}>
-            {/* 🌟 FORM INPUT DILEBARKAN MAKSIMAL: Diubah dari maxWidth "480px" ke "540px" agar form mengisi ruang dengan gagah */}
             <div style={{ width: "100%", maxWidth: "540px", display: "flex", flexDirection: "column" }}>
 
               <h2 style={{ textAlign: "left", fontSize: "20px", fontWeight: 600, color: "#1f2937", marginBottom: "24px", paddingLeft: "4px" }}>
@@ -349,7 +383,9 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               </h2>
 
               <form onSubmit={handleSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}>
-                <div style={{ width: "100%" }}>
+
+                {/* Email - Floating Label */}
+                <div className="input-wrapper">
                   <input
                     type="email"
                     id="email"
@@ -359,12 +395,14 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email address"
+                    placeholder=" "
                     className="custom-input"
                   />
+                  <label htmlFor="email">Email address</label>
                 </div>
 
-                <div style={{ position: "relative", width: "100%", display: "flex", alignItems: "center" }}>
+                {/* Password - Floating Label */}
+                <div className="input-wrapper" style={{ display: "flex", alignItems: "center" }}>
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
@@ -374,14 +412,15 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder=" "
                     className="custom-input"
                     style={{ paddingRight: "56px" }}
                   />
+                  <label htmlFor="password">Password</label>
                   {password.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => { setShowPassword(!showPassword) }}
+                      onClick={() => setShowPassword(!showPassword)}
                       style={{
                         position: "absolute", right: 16, padding: "4px",
                         background: "transparent", border: "none", cursor: "pointer",
@@ -402,7 +441,12 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   )}
                 </div>
 
-                <button type="submit" disabled={isLoading} className="btn-primary">
+                {/* Tombol Login — disabled jika form belum lengkap */}
+                <button
+                  type="submit"
+                  disabled={!isFormValid || isLoading}
+                  className="btn-primary"
+                >
                   {isLoading ? 'Logging in...' : 'Log in'}
                 </button>
               </form>
@@ -416,12 +460,13 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               </button>
 
               <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "12px", marginTop: "auto" }}>
-                {/* Tombol Google OAuth */}
                 <button
                   type="button"
                   onClick={() => {
-                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-                    window.location.href = `${apiUrl}/auth/login`;
+                    setTimeout(() => {
+                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+                      window.location.href = `${apiUrl}/auth/login`;
+                    }, 300);
                   }}
                   className="btn-google-login"
                 >
@@ -433,7 +478,6 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   Log in with Google
                 </button>
 
-                {/* Tombol Create New Account */}
                 <Link to="/register" className="btn-outline-blue">
                   Create new account
                 </Link>
@@ -454,15 +498,16 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           </div>
 
         </div>
+
         {/* FOOTER */}
         <footer style={{
           width: "100%",
           background: "#ffffff",
-          padding: "24px 0",
+          padding: "70px 0",
           boxSizing: "border-box",
           borderTop: "1px solid #f1f1f1"
         }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px", marginTop: "-12px", justifyContent: "flex-start" }}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
               {["Meta", "About", "Blog", "Jobs", "Help", "API", "Privacy", "Terms", "Locations", "Popular", "Instagram Lite", "Meta AI", "Threads", "Contact Uploading & Non-Users", "Meta Verified", "Meta in Indonesia"].map((item) => (
                 <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
@@ -471,28 +516,16 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               ))}
             </div>
 
-            {/* 🌟 PERBAIKAN JARAK: Mengubah gap dari 16px menjadi 6px agar lebih rapat seperti di gambar */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", fontSize: "12px", color: "#737373" }}>
-
-              {/* Dropdown Bahasa Interaktif */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", fontSize: "12px", color: "#737373" }}>
               <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
                 <select
                   defaultValue="en"
                   style={{
-                    fontSize: "12px",
-                    color: "#737373",
-                    background: "transparent",
-                    border: "none",
-                    paddingRight: "0px",
-                    cursor: "pointer",
-                    outline: "none",
-                    appearance: "none",
-                    WebkitAppearance: "none",
-                    MozAppearance: "none"
+                    fontSize: "12px", color: "#737373", background: "transparent",
+                    border: "none", paddingRight: "0px", cursor: "pointer", outline: "none",
+                    appearance: "none", WebkitAppearance: "none", MozAppearance: "none"
                   }}
-                  onChange={(e) => {
-                    console.log("Bahasa diganti ke:", e.target.value);
-                  }}
+                  onChange={(e) => { console.log("Bahasa diganti ke:", e.target.value); }}
                 >
                   <option value="en">English</option>
                   <option value="id">Bahasa Indonesia</option>
@@ -501,23 +534,10 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   <option value="fr">Français</option>
                   <option value="ja">日本語</option>
                 </select>
-                {/* Icon Panah Kecil (Chevron) Gaya Instagram */}
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#737373"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  style={{ pointerEvents: "none", marginLeft: "2px" }}
-                >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#737373" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: "none", marginLeft: "2px" }}>
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
-
-              {/* Teks Copyright */}
               <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
             </div>
           </div>
