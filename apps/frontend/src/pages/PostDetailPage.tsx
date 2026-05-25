@@ -48,7 +48,6 @@ const API_URL = import.meta.env.VITE_API_URL
 export default function PostDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const user = useAuthStore((s) => s.user)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [post, setPost] = useState<Post | null>(null)

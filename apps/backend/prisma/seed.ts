@@ -49,7 +49,7 @@ async function main() {
     data: {
       name: "Siti Rahayu",
       username: "siti_r",
-      email: "siti@test.com",
+      email: "pass",
       password: hashedPassword,
       avatar_url: "https://i.pravatar.cc/150?img=2",
       bio: "Pecinta kucing 🐱",
