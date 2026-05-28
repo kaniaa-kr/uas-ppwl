@@ -19,8 +19,8 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
   const [searchParams] = useSearchParams()
   const setAuth = useAuthStore((state) => state.setAuth)
 
-  // Tombol aktif hanya jika kedua field terisi
-  const isFormValid = email.trim() !== "" && password.trim() !== ""
+  // VALIDASI BARU: Tombol aktif hanya jika email terisi DAN password minimal 6 karakter
+  const isFormValid = email.trim() !== "" && password.trim().length >= 6
 
   // ==========================================
   // OTOMATISASI PASCA-LOGIN GOOGLE OAUTH
@@ -62,10 +62,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (email.trim() === '' || password.trim() === '') {
-      toast.error('Email dan password wajib diisi!');
-      return;
-    }
+    if (!isFormValid) return; // Mencegah submit paksa via Enter jika form belum valid
 
     setIsLoading(true);
 
@@ -142,7 +139,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           transform: translateY(-50%);
           pointer-events: none;
           transition: all 0.15s ease-out;
-          background: white;
+          background: transparent; 
           padding: 0 4px;
           font-size: 14px;
           color: #9ca3af;
@@ -154,6 +151,18 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           transform: translateY(-50%) scale(0.8);
           color: #737373;
           transform-origin: left center;
+          background: #ffffff; 
+        }
+        
+        /* Mengunci warna background putih murni ketika autofill browser aktif */
+        .input-wrapper input:-webkit-autofill {
+          -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+          -webkit-text-fill-color: #1f2937 !important;
+          transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .input-wrapper input:-webkit-autofill ~ label {
+          background: #ffffff !important;
         }
 
         .custom-input {
@@ -162,24 +171,21 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           padding: 20px 16px 8px 16px;
           border: 1.5px solid #e5e7eb;
           border-radius: 16px;
-          background: #ffffff;
+          background: #ffffff !important; /* Memaksa warna putih murni */
           outline: none;
           color: #1f2937;
           box-sizing: border-box;
-          transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+          transition: border-color 0.2s, box-shadow 0.2s;
         }
         .custom-input:hover:not(:focus) {
           border-color: #9ca3af;
         }
         .custom-input:focus {
           border-color: #0095f6 !important;
-          background-color: transparent !important;
+          background-color: #ffffff !important; /* Menjaga tetap putih saat fokus */
           box-shadow: 0 0 0 3px rgba(71, 150, 236, 0.15);
         }
         .custom-input::placeholder {
-          color: transparent;
-        }
-        .custom-input:focus::placeholder {
           color: transparent;
         }
 
@@ -259,17 +265,17 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           display: inline-block;
         }
         footer {
-        width: 100% !important;
-        max-width: 100vw !important;
-        margin-top: 0px !important; /* Menghilangkan jarak kosong di atas footer */
-        padding-top: 12px !important; /* Merapatkan teks menu ke batas atas footer */
-        box-sizing: border-border;
-  }
-      footer > div {
-      width: 100% !important;
-      max-width: 1000px !important; /* Membatasi lebar menu agar rapi di tengah */
-      margin: 0 auto !important; /* Memaksa footer berada di tengah-tengah layar */
-  }
+          width: 100% !important;
+          max-width: 100vw !important;
+          margin-top: 0px !important; 
+          padding-top: 12px !important; 
+          box-sizing: border-box;
+        }
+        footer > div {
+          width: 100% !important;
+          max-width: 1200px !important; 
+          margin: 0 auto !important; 
+        }
       `}</style>
 
       {/* ROOT FULLSCREEN CONTAINER */}
@@ -302,17 +308,17 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             position: "relative",
             overflow: "hidden"
           }}>
-            <div style={{ position: "absolute", top: 24, left: 32 }}>
+            <div style={{ position: "absolute", top: 60, left: 60 }}>
               <img
                 src={LogoInstagram}
                 alt="Instagram"
-                style={{ width: 40, height: 40, objectFit: "contain" }}
+                style={{ width: 75, height: 75, objectFit: "contain" }}
                 onError={(e) => { e.currentTarget.style.display = "none" }}
               />
             </div>
 
             <h1 style={{
-              fontSize: "42px",
+              fontSize: "60px",
               fontWeight: 400,
               color: "#000000",
               lineHeight: 1.25,
@@ -441,7 +447,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   )}
                 </div>
 
-                {/* Tombol Login — disabled jika form belum lengkap */}
+                {/* Tombol Login — Sekarang terkunci otomatis jika password < 6 karakter */}
                 <button
                   type="submit"
                   disabled={!isFormValid || isLoading}
@@ -503,13 +509,13 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         <footer style={{
           width: "100%",
           background: "#ffffff",
-          padding: "70px 0",
+          padding: "100px 0",
           boxSizing: "border-box",
           borderTop: "1px solid #f1f1f1"
         }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0px", marginTop: "-12px", justifyContent: "flex-start" }}>
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px" }}>
-              {["Meta", "About", "Blog", "Jobs", "Help", "API", "Privacy", "Terms", "Locations", "Popular", "Instagram Lite", "Meta AI", "Threads", "Contact Uploading & Non-Users", "Meta Verified", "Meta in Indonesia"].map((item) => (
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",width :"100%", marginTop: "-12px", justifyContent: "flex-start", boxSizing: "border-box", padding: "0 20px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px", width: "100%", maxWidth: "1200px" }}>
+              {["Meta", "About", "Blog", "Jobs", "Help", "API", "Privacy", "Terms", "Locations", "Popular", "Instagram Lite", "Meta AI", "Threads", "Contact Uploading & Non-Users", "Meta Verified", "Meta in indonesia"].map((item) => (
                 <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
                   {item}
                 </a>
@@ -518,25 +524,44 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", fontSize: "12px", color: "#737373" }}>
               <div style={{ display: "flex", alignItems: "center", position: "relative" }}>
-                <select
-                  defaultValue="en"
-                  style={{
-                    fontSize: "12px", color: "#737373", background: "transparent",
-                    border: "none", paddingRight: "0px", cursor: "pointer", outline: "none",
-                    appearance: "none", WebkitAppearance: "none", MozAppearance: "none"
-                  }}
-                  onChange={(e) => { console.log("Bahasa diganti ke:", e.target.value); }}
-                >
-                  <option value="en">English</option>
-                  <option value="id">Bahasa Indonesia</option>
-                  <option value="ms">Bahasa Melayu</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="ja">日本語</option>
-                </select>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#737373" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ pointerEvents: "none", marginLeft: "2px" }}>
-                  <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <select
+                    defaultValue="en"
+                    style={{
+                      fontSize: "12px", color: "#737373", background: "transparent",
+                      border: "none", paddingRight: "14px", cursor: "pointer", outline: "none",
+                      appearance: "none", WebkitAppearance: "none", MozAppearance: "none",
+                      width: "auto", margin: 0
+                    }}
+                    onChange={(e) => { console.log("Bahasa diganti ke:", e.target.value); }}
+                  >
+                    <option value="en">English</option>
+                    <option value="id">Bahasa Indonesia</option>
+                    <option value="ms">Bahasa Melayu</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="ja">日本語</option>
+                  </select>
+                  <svg 
+                    width="10" 
+                    height="10" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="#737373" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    style={{ 
+                      pointerEvents: "none", 
+                      position: "absolute", 
+                      right: "0px", 
+                      top: "50%", 
+                      transform: "translateY(-50%)" 
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </div>
               </div>
               <span style={{ marginLeft: "8px" }}>© 2026 Instagram from Meta</span>
             </div>
