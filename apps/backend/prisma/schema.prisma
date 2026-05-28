@@ -31,6 +31,8 @@ model User {
   likes         PostLike[]
   notifications Notification[] @relation("receiver")
   actions       Notification[] @relation("actor")
+  comment_likes CommentLike[]
+  sessions      Session[]
 }
 
 // ============= POST TABLE =============
@@ -55,16 +57,43 @@ model Comment {
   id         BigInt   @id @default(autoincrement())
   post_id    BigInt
   user_id    BigInt
+  parent_id  BigInt?                        // ← TAMBAH (untuk reply)
   content    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   post          Post           @relation(fields: [post_id], references: [id], onDelete: Cascade)
   user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  parent        Comment?       @relation("CommentReplies", fields: [parent_id], references: [id]) // ← TAMBAH
+  replies       Comment[]      @relation("CommentReplies")                                         // ← TAMBAH
+  likes         CommentLike[]                                                                       // ← TAMBAH
   notifications Notification[]
 
   @@index([post_id])
   @@index([user_id])
+}
+
+// ============= COMMENT_LIKE TABLE =============  ← TAMBAH MODEL BARU INI
+model CommentLike {
+  user_id    BigInt
+  comment_id BigInt
+  created_at DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, comment_id])
+}
+
+// ============= SESSION TABLE =============  ← TAMBAH MODEL BARU INI
+model Session {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  token      String   @unique
+  created_at DateTime @default(now())
+  expires_at DateTime
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 // ============= POST_LIKE TABLE =============
