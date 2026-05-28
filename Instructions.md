@@ -911,7 +911,7 @@ git checkout main
 git pull origin main
 
 # Buat branch kamu
-git checkout -b feat/auth
+git push origin feat/auth
 
 # Install dependencies
 bun install

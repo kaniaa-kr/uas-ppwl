@@ -124,6 +124,32 @@ export default function RegisterPage() {
           transform-origin: left center;
         }
 
+        /* ── FLOATING LABEL UNTUK DROPDOWN BIRTHDAY ── */
+        .select-wrapper {
+          position: relative;
+          flex: 1;
+        }
+        .select-wrapper label {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          pointer-events: none;
+          transition: all 0.15s ease-out;
+          font-size: 14px;
+          color: #737373;
+          font-weight: normal;
+          z-index: 1;
+        }
+        /* Trigger saat select fokus atau memiliki nilai (tidak kosong) */
+        .floating-select:focus ~ label,
+        .floating-select.has-value ~ label {
+          top: 10px;
+          transform: translateY(-50%) scale(0.8);
+          color: #737373;
+          transform-origin: left center;
+        }
+
         /* Khusus label merah saat username tidak tersedia */
         .username-invalid-wrapper input:focus ~ label,
         .username-invalid-wrapper input:not(:placeholder-shown) ~ label {
@@ -149,7 +175,7 @@ export default function RegisterPage() {
         }
         
         .reg-input:focus {
-          border-color: #0095f6 !important;
+          border-color: #0095F6 !important;
         }
         .reg-input:focus::placeholder {
           color: transparent !important;
@@ -221,7 +247,7 @@ export default function RegisterPage() {
               className="h-[30px] w-auto object-contain block"
               onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
-            <span className="text-[17px] font-bold tracking-tight text-gray-600 uppercase leading-none" style={{ marginTop: "1px" }}>
+            <span className="text-[17px] font-bold tracking-tight text-gray-600 uppercase leading-none" style={{ marginTop: "2px" }}>
               Meta
             </span>
           </div>
@@ -330,17 +356,18 @@ export default function RegisterPage() {
               
               <div className="flex gap-2.5 w-full box-border">
                 {/* Month */}
-                <div className="flex-1 relative">
+                <div className="select-wrapper">
                   <select
                     value={birthdayUi.month}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, month: e.target.value }))}
-                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.month ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input floating-select w-full appearance-none pl-4 pr-10 pt-5 pb-1.5 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer text-black ${birthdayUi.month ? 'has-value' : ''}`}
                     required
                   >
-                    <option value="" className="text-gray-400">Month</option>
+                    <option value="" disabled hidden></option>
                     {months.map((m) => <option key={m} value={m} className="text-black">{m}</option>)}
                   </select>
+                  <label>Month</label>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -349,17 +376,18 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Day */}
-                <div className="flex-1 relative">
+                <div className="select-wrapper">
                   <select
                     value={birthdayUi.day}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, day: e.target.value }))}
-                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.day ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input floating-select w-full appearance-none pl-4 pr-10 pt-5 pb-1.5 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer text-black ${birthdayUi.day ? 'has-value' : ''}`}
                     required
                   >
-                    <option value="" className="text-gray-400">Day</option>
+                    <option value="" disabled hidden></option>
                     {days.map((d) => <option key={d} value={d} className="text-black">{d}</option>)}
                   </select>
+                  <label>Day</label>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -368,17 +396,18 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Year */}
-                <div className="flex-1 relative">
+                <div className="select-wrapper">
                   <select
                     value={birthdayUi.year}
                     disabled={loading}
                     onChange={(e) => setBirthdayUi(prev => ({ ...prev, year: e.target.value }))}
-                    className={`reg-input w-full appearance-none p-3 pr-10 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer ${birthdayUi.year ? 'text-black' : 'text-gray-400'}`}
+                    className={`reg-input floating-select w-full appearance-none pl-4 pr-10 pt-5 pb-1.5 border border-gray-200 rounded-[12px] text-[14px] bg-white box-border cursor-pointer text-black ${birthdayUi.year ? 'has-value' : ''}`}
                     required
                   >
-                    <option value="" className="text-gray-400">Year</option>
+                    <option value="" disabled hidden></option>
                     {years.map((y) => <option key={y} value={y} className="text-black">{y}</option>)}
                   </select>
+                  <label>Year</label>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-800 flex items-center">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 12 15 18 9"></polyline>
@@ -488,9 +517,27 @@ export default function RegisterPage() {
                 {loading ? "Submitting..." : "Submit"}
               </button>
 
+              {/* BERIKUT ADALAH BAGIAN YANG DIUBAH MENGIKUTI REQUEST HOVER TANPA UNDERLINE & OVAL ABU-ABU */}
               <Link
                 to="/login"
-                className="w-full py-2.5 bg-white text-[#1c1e21] border border-[#ced0d4] hover:bg-gray-100 font-bold rounded-full text-[13.5px] transition duration-200 text-center no-underline block box-border outline-none"
+                style={{
+                  width: "100%",
+                  padding: "12px 0",
+                  background: "transparent",
+                  color: "#1c1e21", 
+                  border: "1px solid #dbdbdb",
+                  borderRadius: "9999px",
+                  fontSize: "13.5px",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  display: "block",
+                  boxSizing: "border-box",
+                  outline: "none",
+                  transition: "background-color 0.15s ease"
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#EFEFEF"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
               >
                 I already have an account
               </Link>

