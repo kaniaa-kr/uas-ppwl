@@ -1,65 +1,42 @@
 import { useEffect, useState } from "react"
+import { useAuthStore } from "../stores/auth.store"
 import Navbar from "../components/Navbar"
 import PostCard from "../components/PostCard"
 import { toast } from "sonner"
 
-type Post = {
-  id: string
-  content: string
-  image_url?: string
-  created_at: string
-  user: {
-    id: string
-    name: string
-    username: string
-    avatar_url?: string
-  }
-  _count: {
-    likes: number
-    comments: number
-  }
-}
-
 const API_URL = import.meta.env.VITE_API_URL
 
 export default function HomePage() {
-  const [posts, setPosts] = useState<Post[]>([])
+  const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`${API_URL}/posts`)
-      if (!res.ok) throw new Error("Gagal fetch posts")
-      const data = await res.json()
-      setPosts(Array.isArray(data) ? data : [])
-    } catch (error) {
-      console.error("Error fetching posts:", error)
-      toast.error("Gagal memuat postingan")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const res = await fetch(`${API_URL}/posts`)
+        if (!res.ok) throw new Error("Gagal load posts")
+        const data = await res.json()
+        setPosts(data)
+      } catch (error) {
+        toast.error("Gagal memuat postingan")
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchPosts()
   }, [])
 
   return (
-    /* bg app shell */
     <div className="min-h-screen bg-[#fafafa]">
       <Navbar />
 
-      {/* content area — offset for sidebar on desktop, header+bottom on mobile */}
-      <div className="lg:ml-[244px] xl:ml-[335px]">
-        <div className="max-w-[935px] mx-auto lg:flex lg:gap-8 lg:px-4 xl:px-8 lg:pt-8">
-
-          {/* ── Feed column ──────────────────────────────────────────── */}
-          <main className="w-full lg:max-w-[470px]">
-            {/* top spacing for mobile sticky header */}
-            <div className="h-[54px] lg:hidden" />
-
-            {/* Loading skeleton */}
+      {/* Content Area */}
+      <div className="md:ml-[72px] lg:ml-[244px] pt-[48px] md:pt-0 pb-[48px] md:pb-0">
+        <div className="max-w-[935px] mx-auto flex justify-center lg:justify-start lg:gap-[64px] px-0 md:px-5 lg:pt-8">
+          
+          {/* Main Feed */}
+          <main className="w-full max-w-[470px]">
+            {/* Loading */}
             {loading && (
               <div className="flex justify-center items-center h-64">
                 <div className="w-8 h-8 rounded-full border-2 border-[#dbdbdb] border-t-[#737373] animate-spin" />
@@ -73,12 +50,12 @@ export default function HomePage() {
                   <span className="text-2xl">📷</span>
                 </div>
                 <p className="text-[#262626] font-semibold text-xl">Belum ada postingan</p>
-                <p className="text-sm text-[#737373]">Jadilah yang pertama berbagi foto!</p>
+                <p className="text-sm text-[#737373]">Ikuti seseorang untuk melihat fotonya!</p>
               </div>
             )}
 
-            {/* Posts feed */}
-            <div className="flex flex-col">
+            {/* Posts */}
+            <div className="flex flex-col gap-4 md:gap-5 md:mt-4">
               {posts.map((post) => (
                 <PostCard
                   key={post.id}
@@ -91,45 +68,54 @@ export default function HomePage() {
                 />
               ))}
             </div>
-
-            {/* bottom spacing for mobile bottom-nav */}
-            <div className="h-[49px] lg:hidden" />
           </main>
 
-          {/* ── Desktop right panel ───────────────────────────────────── */}
-          <aside className="hidden lg:block flex-shrink-0 w-[293px] xl:w-[319px] pt-2">
+          {/* Right Sidebar */}
+          <aside className="hidden lg:block w-[319px] pt-4 flex-shrink-0">
             {/* Suggested users placeholder */}
-            <p className="text-sm font-semibold text-[#737373] mb-4">Saran untukmu</p>
-            {[
-              { username: "suggested_user1", name: "Pengguna 1" },
-              { username: "suggested_user2", name: "Pengguna 2" },
-              { username: "suggested_user3", name: "Pengguna 3" },
-            ].map((u) => (
-              <div key={u.username} className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <img
-                    src={`https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=64&background=e0e0e0&color=757575`}
-                    alt={u.username}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                  <div>
-                    <p className="text-xs font-semibold text-[#262626] leading-tight">{u.username}</p>
-                    <p className="text-xs text-[#737373] leading-tight">Saran untukmu</p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-sm font-semibold text-[#737373]">Disarankan untuk Anda</p>
+              <button className="text-xs font-semibold text-[#262626] hover:text-[#737373]">Lihat Semua</button>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              {[
+                { username: "sipaling_makan", name: "Foodie JKT" },
+                { username: "tukang_jalan", name: "Traveler" },
+                { username: "kucing_oren", name: "Cat Lover" },
+              ].map((u) => (
+                <div key={u.username} className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&size=64&background=e0e0e0&color=757575`}
+                      alt={u.username}
+                      className="w-11 h-11 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-[#262626] leading-none">{u.username}</p>
+                      <p className="text-[13px] text-[#737373] mt-1 leading-none">Disarankan untuk Anda</p>
+                    </div>
                   </div>
+                  <button className="text-xs font-semibold text-[#0095f6] hover:text-[#00376b] transition-colors">
+                    Ikuti
+                  </button>
                 </div>
-                <button className="text-xs font-semibold text-[#0095f6] hover:text-[#00376b] transition-colors">
-                  Ikuti
-                </button>
-              </div>
-            ))}
+              ))}
+            </div>
 
             {/* Footer */}
-            <div className="mt-6">
-              <p className="text-[10px] text-[#c7c7c7] leading-relaxed">
-                Tentang · Bantuan · Pers · API · Pekerjaan · Privasi · Ketentuan · Lokasi · Bahasa
-              </p>
-              <p className="text-[10px] text-[#c7c7c7] mt-2">
-                © 2026 INSTAGRAM FROM META
+            <div className="mt-8">
+              <div className="flex flex-wrap gap-x-1 gap-y-1 text-[#c7c7c7] text-[12px]">
+                <a href="#" className="hover:underline">Tentang</a> ·
+                <a href="#" className="hover:underline">Bantuan</a> ·
+                <a href="#" className="hover:underline">Pers</a> ·
+                <a href="#" className="hover:underline">API</a> ·
+                <a href="#" className="hover:underline">Pekerjaan</a> ·
+                <a href="#" className="hover:underline">Privasi</a> ·
+                <a href="#" className="hover:underline">Ketentuan</a>
+              </div>
+              <p className="text-[#c7c7c7] text-[12px] mt-4 uppercase">
+                © 2026 INSTAGRAM CLONE PPWL
               </p>
             </div>
           </aside>

@@ -13,12 +13,11 @@ export default function RegisterPage() {
     password: "",
   })
   const [loading, setLoading] = useState(false)
-  const setAuth = useAuthStore((s) => s.setAuth)
+  
   const navigate = useNavigate()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handleRegister = async () => {
@@ -27,33 +26,21 @@ export default function RegisterPage() {
       return
     }
 
-    if (form.password.length < 6) {
-      toast.error("Password minimal 6 karakter")
-      return
-    }
-
     setLoading(true)
     try {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(form)
       })
-      const data = await res.json()
-
       if (!res.ok) {
-        toast.error(data.error || "Registrasi gagal")
-        return
+        const errorData = await res.json()
+        throw new Error(errorData.message || "Gagal mendaftar")
       }
-
-      setAuth(data.user, data.accessToken)
-      toast.success(
-        `Akun berhasil dibuat! Selamat datang, ${data.user.name}! 🎉`
-      )
-      navigate("/")
-    } catch (error) {
-      console.error("Register error:", error)
-      toast.error("Terjadi kesalahan, coba lagi")
+      toast.success("Registrasi berhasil, silakan login")
+      navigate("/login")
+    } catch (error: any) {
+      toast.error(error.message || "Gagal mendaftar")
     } finally {
       setLoading(false)
     }
@@ -66,17 +53,17 @@ export default function RegisterPage() {
   const allFilled = form.name && form.username && form.email && form.password
 
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-4 py-8">
       {/* Card */}
-      <div className="w-full max-w-[350px] bg-white border border-[#dbdbdb] px-10 py-10 flex flex-col items-center">
+      <div className="w-full max-w-[350px] bg-white border border-[#dbdbdb] px-10 pt-10 pb-8 flex flex-col items-center mb-[10px]">
         {/* Logo */}
         <h1
           className="text-[#262626] mb-4 select-none"
           style={{
-            fontFamily: "Billabong, Georgia, serif",
+            fontFamily: "Billabong, 'Grand Hotel', cursive, Georgia, serif",
             fontStyle: "italic",
-            fontWeight: 700,
-            fontSize: "2.4rem",
+            fontWeight: 500,
+            fontSize: "2.8rem",
             lineHeight: 1,
           }}
         >
@@ -84,9 +71,16 @@ export default function RegisterPage() {
         </h1>
 
         {/* Tagline */}
-        <p className="text-[#737373] font-semibold text-center text-base leading-snug mb-6 px-2">
+        <p className="text-[#737373] font-semibold text-center text-[16px] leading-[20px] mb-4">
           Daftar untuk melihat foto dan video dari teman-temanmu.
         </p>
+
+        {/* Divider */}
+        <div className="w-full flex items-center gap-4 mt-2 mb-4">
+          <div className="flex-1 h-px bg-[#dbdbdb]" />
+          <span className="text-[13px] font-semibold text-[#737373] tracking-widest">ATAU</span>
+          <div className="flex-1 h-px bg-[#dbdbdb]" />
+        </div>
 
         {/* Form */}
         <div className="w-full flex flex-col gap-[6px]">
@@ -97,7 +91,7 @@ export default function RegisterPage() {
             value={form.email}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pt-[9px] pb-[7px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             name="name"
@@ -106,7 +100,7 @@ export default function RegisterPage() {
             value={form.name}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pt-[9px] pb-[7px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             name="username"
@@ -115,7 +109,7 @@ export default function RegisterPage() {
             value={form.username}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pt-[9px] pb-[7px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             name="password"
@@ -124,21 +118,21 @@ export default function RegisterPage() {
             value={form.password}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-2 pt-[9px] pb-[7px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
 
           {/* Terms notice */}
-          <p className="text-[10px] text-[#737373] text-center mt-2 leading-relaxed">
+          <p className="text-[12px] text-[#737373] text-center mt-3 leading-[16px] mb-2">
             Dengan mendaftar, kamu menyetujui{" "}
-            <span className="font-semibold text-[#262626]">Ketentuan</span>,{" "}
-            <span className="font-semibold text-[#262626]">Kebijakan Privasi</span>, dan{" "}
-            <span className="font-semibold text-[#262626]">Kebijakan Cookie</span> kami.
+            <span className="font-semibold text-[#00376b]">Ketentuan</span>,{" "}
+            <span className="font-semibold text-[#00376b]">Kebijakan Privasi</span>, dan{" "}
+            <span className="font-semibold text-[#00376b]">Kebijakan Cookie</span> kami.
           </p>
 
           <button
             onClick={handleRegister}
             disabled={loading || !allFilled}
-            className="w-full mt-2 bg-[#0095f6] text-white text-sm font-semibold py-[7px] rounded-lg disabled:opacity-40 transition-opacity"
+            className="w-full mt-2 bg-[#0095f6] hover:bg-[#1877f2] text-white text-[13px] font-semibold py-[7px] rounded-lg disabled:opacity-70 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? "Sedang mendaftar..." : "Daftar"}
           </button>
@@ -146,9 +140,9 @@ export default function RegisterPage() {
       </div>
 
       {/* Login link */}
-      <div className="w-full max-w-[350px] mt-2.5 bg-white border border-[#dbdbdb] px-10 py-5 flex items-center justify-center">
-        <p className="text-sm text-[#262626]">
-          Sudah punya akun?{" "}
+      <div className="w-full max-w-[350px] bg-white border border-[#dbdbdb] py-5 flex items-center justify-center">
+        <p className="text-[14px] text-[#262626] m-4 text-center">
+          Punya akun?{" "}
           <Link
             to="/login"
             className="text-[#0095f6] font-semibold hover:text-[#00376b] transition-colors"
@@ -157,6 +151,9 @@ export default function RegisterPage() {
           </Link>
         </p>
       </div>
+
+      {/* App download hint */}
+      <p className="mt-5 text-[14px] text-[#262626]">Dapatkan aplikasinya.</p>
     </div>
   )
 }

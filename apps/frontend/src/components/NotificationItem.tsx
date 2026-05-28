@@ -1,48 +1,46 @@
 import type { Notification } from "../stores/notification.store"
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
-  const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return "baru saja"
-  if (minutes < 60) return `${minutes} menit lalu`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} jam lalu`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} hari lalu`
-  const weeks = Math.floor(days / 7)
-  return `${weeks} minggu lalu`
-}
-
 type Props = {
   notification: Notification
   onMarkAsRead: (id: string) => void
 }
 
-export default function NotificationItem({ notification, onMarkAsRead }: Props) {
-  const { actor, type, post, is_read, created_at, id } = notification
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const minutes = Math.floor(diff / 60000)
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}j`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return `${days}h`
+  return `${Math.floor(days / 7)}mgg`
+}
+
+export default function NotificationItem({
+  notification,
+  onMarkAsRead,
+}: Props) {
+  const { id, type, actor, post, created_at, is_read } = notification
 
   const initials = actor.name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
+    ? actor.name.substring(0, 2).toUpperCase()
+    : "US"
 
   const message =
     type === "like"
-      ? "menyukai postingan kamu."
-      : "mengomentari postingan kamu."
+      ? "menyukai postingan Anda."
+      : "mengomentari postingan Anda."
 
   return (
     <div
       onClick={() => onMarkAsRead(id)}
-      className={`flex items-center gap-3 px-3 py-3 cursor-pointer transition-colors hover:bg-[#f9f9f9] rounded-sm ${
-        !is_read ? "bg-[#eff7ff]" : "bg-white"
+      className={`flex items-center gap-[14px] px-2 py-3 cursor-pointer transition-colors hover:bg-[#fafafa] rounded-[8px] ${
+        !is_read ? "bg-white" : "bg-white"
       }`}
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-11 h-11 rounded-full overflow-hidden bg-[#e0e0e0] flex items-center justify-center">
+        <div className="w-[44px] h-[44px] rounded-full overflow-hidden bg-[#e0e0e0] flex items-center justify-center cursor-pointer">
           {actor.avatar_url ? (
             <img
               src={actor.avatar_url}
@@ -50,29 +48,21 @@ export default function NotificationItem({ notification, onMarkAsRead }: Props) 
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-sm font-semibold text-[#737373]">{initials}</span>
+            <span className="text-[14px] font-semibold text-[#737373]">{initials}</span>
           )}
         </div>
-        {/* type badge */}
-        <span
-          className={`absolute -bottom-0.5 -right-0.5 w-[18px] h-[18px] rounded-full flex items-center justify-center text-[9px] ${
-            type === "like" ? "bg-[#ff3040]" : "bg-[#0095f6]"
-          }`}
-        >
-          {type === "like" ? "❤️" : "💬"}
-        </span>
       </div>
 
-      {/* Text */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#262626] leading-snug">
-          <span className="font-semibold">{actor.username}</span>{" "}
-          <span>{message}</span>
-          {post && (
-            <span className="text-[#737373]"> "{post.content.slice(0, 30)}…"</span>
+      {/* Text Content */}
+      <div className="flex-1 text-left min-w-0 flex items-center flex-wrap gap-1">
+        <p className="text-[14px] text-[#262626] leading-snug">
+          <span className="font-semibold cursor-pointer">{actor.username}</span>{" "}
+          {message}{" "}
+          {post && type === "comment" && (
+            <span className="text-[#737373]">"{post.content.slice(0, 30)}…" </span>
           )}
+          <span className="text-[14px] text-[#737373]">{timeAgo(created_at)}</span>
         </p>
-        <p className="text-xs text-[#737373] mt-[3px]">{timeAgo(created_at)}</p>
       </div>
 
       {/* Post thumbnail or unread dot */}
@@ -80,10 +70,10 @@ export default function NotificationItem({ notification, onMarkAsRead }: Props) 
         <img
           src={post.image_url}
           alt=""
-          className="w-11 h-11 object-cover flex-shrink-0 rounded-sm"
+          className="w-[44px] h-[44px] object-cover flex-shrink-0 rounded-sm cursor-pointer"
         />
       ) : !is_read ? (
-        <div className="w-2.5 h-2.5 rounded-full bg-[#0095f6] flex-shrink-0" />
+        <div className="w-2.5 h-2.5 rounded-full bg-[#0095f6] flex-shrink-0 ml-2" />
       ) : null}
     </div>
   )
