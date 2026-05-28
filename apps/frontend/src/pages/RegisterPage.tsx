@@ -22,7 +22,6 @@ export default function RegisterPage() {
   }
 
   const handleRegister = async () => {
-    // Validasi
     if (!form.name || !form.username || !form.email || !form.password) {
       toast.error("Semua field wajib diisi")
       return
@@ -64,15 +63,42 @@ export default function RegisterPage() {
     if (e.key === "Enter") handleRegister()
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-emerald-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold">Buat Akun Baru</h1>
-          <p className="text-gray-500 text-sm mt-1">Bergabung dengan kami</p>
-        </div>
+  const allFilled = form.name && form.username && form.email && form.password
 
-        <div className="flex flex-col gap-3">
+  return (
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-4">
+      {/* Card */}
+      <div className="w-full max-w-[350px] bg-white border border-[#dbdbdb] px-10 py-10 flex flex-col items-center">
+        {/* Logo */}
+        <h1
+          className="text-[#262626] mb-4 select-none"
+          style={{
+            fontFamily: "Billabong, Georgia, serif",
+            fontStyle: "italic",
+            fontWeight: 700,
+            fontSize: "2.4rem",
+            lineHeight: 1,
+          }}
+        >
+          Instagram
+        </h1>
+
+        {/* Tagline */}
+        <p className="text-[#737373] font-semibold text-center text-base leading-snug mb-6 px-2">
+          Daftar untuk melihat foto dan video dari teman-temanmu.
+        </p>
+
+        {/* Form */}
+        <div className="w-full flex flex-col gap-[6px]">
+          <input
+            name="email"
+            type="email"
+            placeholder="Nomor telepon atau email"
+            value={form.email}
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
+          />
           <input
             name="name"
             type="text"
@@ -80,48 +106,54 @@ export default function RegisterPage() {
             value={form.name}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             name="username"
             type="text"
-            placeholder="Username (tanpa spasi)"
+            placeholder="Nama pengguna"
             value={form.username}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
-          />
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             name="password"
             type="password"
-            placeholder="Password (min. 6 karakter)"
+            placeholder="Kata sandi"
             value={form.password}
             onChange={handleChange}
             onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
+
+          {/* Terms notice */}
+          <p className="text-[10px] text-[#737373] text-center mt-2 leading-relaxed">
+            Dengan mendaftar, kamu menyetujui{" "}
+            <span className="font-semibold text-[#262626]">Ketentuan</span>,{" "}
+            <span className="font-semibold text-[#262626]">Kebijakan Privasi</span>, dan{" "}
+            <span className="font-semibold text-[#262626]">Kebijakan Cookie</span> kami.
+          </p>
+
           <button
             onClick={handleRegister}
-            disabled={loading}
-            className="bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 disabled:opacity-50 transition"
+            disabled={loading || !allFilled}
+            className="w-full mt-2 bg-[#0095f6] text-white text-sm font-semibold py-[7px] rounded-lg disabled:opacity-40 transition-opacity"
           >
             {loading ? "Sedang mendaftar..." : "Daftar"}
           </button>
         </div>
+      </div>
 
-        <p className="text-center text-sm text-gray-600 mt-4">
+      {/* Login link */}
+      <div className="w-full max-w-[350px] mt-2.5 bg-white border border-[#dbdbdb] px-10 py-5 flex items-center justify-center">
+        <p className="text-sm text-[#262626]">
           Sudah punya akun?{" "}
-          <Link to="/login" className="text-blue-500 font-semibold hover:underline">
-            Masuk di sini
+          <Link
+            to="/login"
+            className="text-[#0095f6] font-semibold hover:text-[#00376b] transition-colors"
+          >
+            Masuk
           </Link>
         </p>
       </div>

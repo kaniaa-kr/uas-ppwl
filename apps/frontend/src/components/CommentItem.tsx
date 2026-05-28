@@ -44,52 +44,57 @@ export default function CommentItem({
 
   return (
     <div
-      className={`flex gap-3 py-2 ${
-        parentId ? "ml-10" : ""
+      className={`flex items-start gap-3 py-[10px] ${
+        parentId ? "ml-11 pl-0" : ""
       }`}
     >
+      {/* Avatar */}
       <img
         src={
           author.avatar_url ||
           `https://ui-avatars.com/api/?name=${encodeURIComponent(
             author.name
-          )}&size=64&background=random`
+          )}&size=64&background=e0e0e0&color=757575`
         }
         alt={author.name}
         className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
       />
 
-      <div className="flex-1">
-        <p className="text-sm text-[#262626] leading-[18px]">
-          <span className="font-semibold">{displayName}</span>{" "}
+      {/* Text block */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-[#262626] leading-snug">
+          <span className="font-semibold mr-1">{displayName}</span>
           {content}
         </p>
 
-        <div className="flex items-center gap-3 mt-[6px]">
-          <span className="text-xs text-[#8e8e8e]">
+        <div className="flex items-center gap-4 mt-[5px]">
+          <span className="text-[11px] text-[#737373]">
             {formatDate(createdAt)}
           </span>
 
           <button
             onClick={() => onReply?.(id, displayName)}
-            className="text-xs text-[#8e8e8e] font-semibold hover:text-[#262626]"
+            className="text-[11px] text-[#737373] font-semibold hover:text-[#262626] transition-colors"
           >
             Balas
           </button>
         </div>
       </div>
 
+      {/* Like button */}
       <button
         onClick={() => setLiked(!liked)}
-        className="pt-1"
+        className="pt-1 flex-shrink-0"
+        aria-label="Suka komentar"
       >
         <Heart
           size={11}
           className={
             liked
-              ? "fill-red-500 text-red-500"
-              : "text-[#8e8e8e]"
+              ? "fill-[#ff3040] text-[#ff3040]"
+              : "text-[#737373] hover:text-[#262626]"
           }
+          fill={liked ? "currentColor" : "none"}
         />
       </button>
     </div>

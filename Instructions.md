@@ -3121,3 +3121,60 @@ git push origin feat/branch-kamu
 - **Help:** Buat issue di repo jika ada kendala
 
 **Sukses untuk Minggu 15! 🚀**
+
+---
+
+## 14. Panduan Redesign UI (Instagram Clone)
+
+Untuk membuat tampilan UI (Frontend) mirip dengan Instagram *tanpa mengubah fungsi atau struktur file yang sudah ada*, tim UI/UX atau tim Frontend dapat mengikuti panduan modifikasi styling berikut ini. Kalian juga bisa memberikan instruksi ini ke AI (seperti ChatGPT/Claude) untuk men-generate kode component-nya.
+
+### A. Komponen `PostCard.tsx`
+Instagram memiliki desain yang sangat bersih dan flat (tanpa bayangan/shadow tebal).
+
+**Instruksi Styling untuk Tim/AI:**
+1. **Container Utama**: Hapus `shadow-sm`, `rounded-2xl`, dan `border` (untuk versi mobile, border dihapus sepenuhnya. Untuk desktop bisa pakai `border border-gray-200 rounded-sm`). Hapus `overflow-hidden`.
+2. **Header Post (Avatar & Username)**: 
+   - Ubah font username menjadi lebih tebal (`font-bold` atau `font-semibold`).
+   - Avatar pastikan membulat sempurna dengan padding yang cukup (sekitar `p-3`).
+3. **Gambar Postingan**: 
+   - Gambar harus memenuhi lebar container secara full (tanpa padding/margin di sisi kiri/kanan).
+   - Pastikan rasionya konsisten, hilangkan border-radius (rounded) pada gambar.
+4. **Action Bar (Tombol Like, Comment, Share)**:
+   - Pindahkan ketiga icon tersebut ke sisi kiri bawah gambar.
+   - Hapus teks angka (`likes` dan `comments`) dari *dalam* tombol. Tombol hanya berupa icon murni (outline, bukan fill, kecuali di-like).
+   - Gunakan icon Lucide: `Heart`, `MessageCircle`, `Send` (ganti `Share2` menjadi `Send`).
+   - Tambahkan icon `Bookmark` di pojok kanan ujung dari Action Bar.
+5. **Section Informasi (Likes & Caption)**:
+   - Buat div baru di bawah Action Bar untuk menampilkan jumlah likes: `<p className="font-semibold text-sm">{likes} likes</p>`.
+   - Di bawah jumlah likes, tampilkan caption dengan format: `<span className="font-semibold mr-2">{user.username}</span> {content}`.
+   - Hapus garis pembatas (border-t) pada footer.
+
+### B. Komponen `HomePage.tsx`
+Instagram memiliki feed yang terpusat dengan ukuran spesifik.
+
+**Instruksi Styling untuk Tim/AI:**
+1. **Feed Layout**: Ubah `max-w-lg` menjadi sedikit lebih ramping atau lebih lebar sesuai preferensi (biasanya sekitar `max-w-[470px]` atau `max-w-xl` untuk bagian feed).
+2. **Spacing**: Jarak antar `PostCard` (`gap-6`) bisa diubah menjadi lebih rapat, atau beri garis pembatas tipis (`border-b border-gray-200`) di bagian bawah setiap post untuk memisahkan post.
+3. **Background**: Pastikan background aplikasi adalah putih bersih (`bg-white`), atau abu-abu sangat muda jika ingin menonjolkan border post di tampilan desktop.
+
+### C. Komponen `Navbar.tsx` (Bawah untuk Mobile, Atas/Kiri untuk Desktop)
+Instagram membedakan posisi navigasi berdasarkan ukuran layar (Responsive).
+
+**Instruksi Styling untuk Tim/AI:**
+1. **Navigasi Bawah (Mobile)**: 
+   - Gunakan `fixed bottom-0 w-full bg-white border-t` agar navigasi berada di bagian bawah layar seperti aplikasi HP.
+   - Pindahkan icon `Home`, `Search` (opsional), dan `User Avatar` ke bagian bawah ini, disejajarkan secara horizontal dengan `justify-around`.
+2. **Header Atas (Mobile)**:
+   - Header atas hanya menampilkan Logo Instagram (teks dengan font-serif/cursive atau styling tebal) dan icon Notifikasi/Pesan (bell/send).
+3. **Navigasi Samping (Desktop - Opsional)**:
+   - Jika layar besar (`md:` atau `lg:`), buat Navbar menjadi Sidebar di sebelah kiri layar (lebar sekitar `244px` atau `60px` ter-collapse), menumpuk icon secara vertikal dengan label teks di samping icon.
+
+### Prompt AI Copy-Paste (Kirim ke Tim AI)
+> *"Tolong refactor SELURUH komponen dan halaman React di frontend aplikasi ini (termasuk `LoginPage.tsx`, `RegisterPage.tsx`, `HomePage.tsx`, `PostDetailPage.tsx`, `NotificationPage.tsx`, `Navbar.tsx`, `PostCard.tsx`, `CommentItem.tsx`, dan `NotificationItem.tsx`) menggunakan Tailwind CSS dan Lucide React. Saya ingin merubah stylingnya agar terlihat profesional, modern, dan sangat mirip dengan desain UI asli Instagram (Clean, minimalis, border tipis, flat design tanpa shadow tebal). Tolong JANGAN ubah props komponen, jangan mengubah state management (Zustand) atau logic fetch datanya, HANYA ubah className Tailwind dan struktur susunan JSX (HTML) nya saja agar lebih aesthetic dan responsif.
+> 
+> Detail spesifik:
+> 1. **Global/Layout**: Gunakan background putih/abu-abu sangat terang, responsif untuk mobile (bottom navigation) dan desktop (sidebar kiri).
+> 2. **Auth Pages**: Buat desain form login & register yang sleek, menempatkan form di tengah layar dengan styling minimalis, border tipis, dan typography yang rapi.
+> 3. **Navbar**: Buat header sticky top berisi logo di mobile dengan bottom navigation bar, dan jadikan sidebar kiri untuk layar desktop besar.
+> 4. **PostCard & Detail**: Hilangkan bayangan (shadow), buat gambar terentang full width edge-to-edge untuk mobile, pindahkan icon Like/Comment/Share berjejer ke bawah gambar di sebelah kiri, dan letakkan teks jumlah likes dan caption di bawah icon dengan username yang di-bold.
+> 5. **Comments & Notifications**: Desain list yang rapi, avatar membulat sempurna, margin yang pas, dan divider tipis antar item untuk kesan clean."*

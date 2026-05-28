@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import {
   Heart,
   MessageCircle,
-  Share2,
+  Send,
   Bookmark,
   MoreHorizontal,
 } from "lucide-react"
@@ -56,7 +56,6 @@ export default function PostDetailPage() {
   const [replyTo, setReplyTo] = useState<string | null>(null)
   const [replyUsername, setReplyUsername] = useState<string | null>(null)
   const [liked, setLiked] = useState(false)
-  
 
   useEffect(() => {
     if (!id) return
@@ -123,50 +122,257 @@ export default function PostDetailPage() {
   const replies = comments.filter((c) => c.parent_id)
 
   return (
-    <>
+    <div className="min-h-screen bg-[#fafafa]">
       <Navbar />
 
-      <div className="max-w-5xl mx-auto mt-10 border border-[#dbdbdb] bg-white flex">
+      {/* Content offset for desktop sidebar */}
+      <div className="lg:ml-[244px] xl:ml-[335px]">
+        {/* Mobile top spacing */}
+        <div className="h-[54px] lg:hidden" />
 
-        {/* IMAGE */}
-        <div className="w-1/2 bg-black flex items-center justify-center">
-          {post.image_url && (
-            <img
-              src={post.image_url}
-              className="w-full object-contain"
-            />
-          )}
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="w-1/2 flex flex-col h-[80vh]">
-
-          
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <div className="flex items-center gap-3">
-              <ArrowLeft
-                size={20}
-                onClick={() => navigate(-1)}
-                className="cursor-pointer"
-              />
+        {/* ── Desktop: split card layout ─────────────────────────────── */}
+        <div className="hidden lg:flex max-w-[935px] mx-auto mt-6 border border-[#dbdbdb] bg-white" style={{ maxHeight: "90vh" }}>
+          {/* Left: Image */}
+          <div className="flex-1 bg-black flex items-center justify-center overflow-hidden">
+            {post.image_url ? (
               <img
-                src={
-                  post.user.avatar_url ||
-                  `https://ui-avatars.com/api/?name=${post.user.name}`
-                }
-                className="w-8 h-8 rounded-full"
+                src={post.image_url}
+                alt={`Post oleh ${post.user.username}`}
+                className="w-full h-full object-contain"
               />
-              <span className="font-semibold text-sm">
-                {post.user.username}
-              </span>
-            </div>
-            <MoreHorizontal size={20} />
+            ) : (
+              <div className="w-full aspect-square bg-[#1a1a1a] flex items-center justify-center">
+                <span className="text-[#737373] text-sm">Tidak ada gambar</span>
+              </div>
+            )}
           </div>
 
-          {/* Comments */}
-          <div className="flex-1 overflow-y-auto px-4 py-3">
+          {/* Right: Comments panel */}
+          <div className="w-[340px] xl:w-[405px] flex flex-col border-l border-[#dbdbdb]" style={{ maxHeight: "90vh" }}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#dbdbdb] flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="text-[#262626] hover:text-[#737373] transition-colors"
+                >
+                  <ArrowLeft size={20} strokeWidth={1.5} />
+                </button>
+                <div className="w-8 h-8 rounded-full p-[1.5px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+                  <div className="w-full h-full rounded-full bg-white p-[1px]">
+                    <img
+                      src={
+                        post.user.avatar_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=e0e0e0&color=757575`
+                      }
+                      alt={post.user.name}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-[#262626]">
+                  {post.user.username}
+                </span>
+              </div>
+              <button className="text-[#262626] hover:text-[#737373] transition-colors">
+                <MoreHorizontal size={20} strokeWidth={1.5} />
+              </button>
+            </div>
 
+            {/* Caption + Comments scrollable */}
+            <div className="flex-1 overflow-y-auto px-4 py-4">
+              {/* Caption as first "comment" */}
+              <div className="flex gap-3 mb-4 pb-4 border-b border-[#efefef]">
+                <img
+                  src={
+                    post.user.avatar_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=e0e0e0&color=757575`
+                  }
+                  alt={post.user.name}
+                  className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-0.5"
+                />
+                <p className="text-sm text-[#262626] leading-snug">
+                  <span className="font-semibold mr-1">{post.user.username}</span>
+                  {post.content}
+                </p>
+              </div>
+
+              {/* Comments */}
+              {rootComments.map((comment) => (
+                <div key={comment.id}>
+                  <CommentItem
+                    id={comment.id}
+                    author={comment.user}
+                    content={comment.content}
+                    createdAt={comment.created_at}
+                    parentId={comment.parent_id}
+                    onReply={handleReply}
+                  />
+                  {replies
+                    .filter((r) => r.parent_id === comment.id)
+                    .map((reply) => (
+                      <CommentItem
+                        key={reply.id}
+                        id={reply.id}
+                        author={reply.user}
+                        content={reply.content}
+                        createdAt={reply.created_at}
+                        parentId={reply.parent_id}
+                        onReply={handleReply}
+                      />
+                    ))}
+                </div>
+              ))}
+            </div>
+
+            {/* Action icons + comment input */}
+            <div className="border-t border-[#dbdbdb] flex-shrink-0">
+              {/* Icons */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setLiked(!liked)}
+                    aria-label="Suka"
+                    className="transition-transform active:scale-90"
+                  >
+                    <Heart
+                      size={24}
+                      strokeWidth={1.5}
+                      className={liked ? "text-[#ff3040]" : "text-[#262626] hover:text-[#737373]"}
+                      fill={liked ? "currentColor" : "none"}
+                    />
+                  </button>
+                  <button aria-label="Komentar" className="text-[#262626] hover:text-[#737373] transition-colors">
+                    <MessageCircle size={24} strokeWidth={1.5} />
+                  </button>
+                  <button aria-label="Bagikan" className="text-[#262626] hover:text-[#737373] transition-colors">
+                    <Send size={24} strokeWidth={1.5} />
+                  </button>
+                </div>
+                <button aria-label="Simpan" className="text-[#262626] hover:text-[#737373] transition-colors">
+                  <Bookmark size={24} strokeWidth={1.5} />
+                </button>
+              </div>
+
+              {/* Likes count */}
+              <p className="px-4 text-sm font-semibold text-[#262626] pb-1">
+                {(post._count.likes).toLocaleString("id-ID")} suka
+              </p>
+
+              {/* Reply indicator */}
+              {replyUsername && (
+                <div className="px-4 pb-1 text-xs text-[#737373] flex items-center gap-1">
+                  <span>Membalas</span>
+                  <span className="font-semibold text-[#262626]">@{replyUsername}</span>
+                  <button
+                    onClick={() => { setReplyTo(null); setReplyUsername(null) }}
+                    className="ml-1 text-[#ed4956] font-semibold hover:underline"
+                  >
+                    Batal
+                  </button>
+                </div>
+              )}
+
+              {/* Comment input */}
+              <div className="flex items-center gap-3 px-4 py-3 border-t border-[#efefef]">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmitComment()}
+                  placeholder="Tambahkan komentar..."
+                  className="flex-1 text-sm text-[#262626] placeholder-[#737373] outline-none bg-transparent"
+                />
+                {newComment.trim() && (
+                  <button
+                    onClick={handleSubmitComment}
+                    className="text-[#0095f6] font-semibold text-sm hover:text-[#00376b] transition-colors"
+                  >
+                    Kirim
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Mobile: stacked layout ──────────────────────────────────── */}
+        <div className="lg:hidden bg-white">
+          {/* Mobile header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#dbdbdb]">
+            <div className="flex items-center gap-3">
+              <button onClick={() => navigate(-1)} className="text-[#262626]">
+                <ArrowLeft size={20} strokeWidth={1.5} />
+              </button>
+              <span className="text-base font-semibold text-[#262626]">Postingan</span>
+            </div>
+            <button className="text-[#262626]">
+              <MoreHorizontal size={20} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Post author row */}
+          <div className="flex items-center justify-between px-3 py-[10px]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+                <div className="w-full h-full rounded-full bg-white p-[1.5px]">
+                  <img
+                    src={
+                      post.user.avatar_url ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=e0e0e0&color=757575`
+                    }
+                    alt={post.user.name}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                </div>
+              </div>
+              <span className="text-sm font-semibold text-[#262626]">{post.user.username}</span>
+            </div>
+          </div>
+
+          {/* Image */}
+          {post.image_url && (
+            <div className="w-full aspect-square bg-black overflow-hidden">
+              <img
+                src={post.image_url}
+                alt={`Post oleh ${post.user.username}`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center justify-between px-3 pt-[10px] pb-[6px]">
+            <div className="flex items-center gap-4">
+              <button onClick={() => setLiked(!liked)} aria-label="Suka" className="active:scale-90 transition-transform">
+                <Heart size={24} strokeWidth={1.5} className={liked ? "text-[#ff3040]" : "text-[#262626]"} fill={liked ? "currentColor" : "none"} />
+              </button>
+              <button aria-label="Komentar" className="text-[#262626]">
+                <MessageCircle size={24} strokeWidth={1.5} />
+              </button>
+              <button aria-label="Bagikan" className="text-[#262626]">
+                <Send size={24} strokeWidth={1.5} />
+              </button>
+            </div>
+            <button aria-label="Simpan" className="text-[#262626]">
+              <Bookmark size={24} strokeWidth={1.5} />
+            </button>
+          </div>
+
+          {/* Likes */}
+          <p className="px-3 text-sm font-semibold text-[#262626] pb-1">
+            {(post._count.likes).toLocaleString("id-ID")} suka
+          </p>
+
+          {/* Caption */}
+          <p className="px-3 pb-2 text-sm text-[#262626]">
+            <span className="font-semibold mr-1">{post.user.username}</span>
+            {post.content}
+          </p>
+
+          {/* Comments */}
+          <div className="border-t border-[#efefef] px-3 py-3">
             {rootComments.map((comment) => (
               <div key={comment.id}>
                 <CommentItem
@@ -177,7 +383,6 @@ export default function PostDetailPage() {
                   parentId={comment.parent_id}
                   onReply={handleReply}
                 />
-
                 {replies
                   .filter((r) => r.parent_id === comment.id)
                   .map((reply) => (
@@ -193,68 +398,43 @@ export default function PostDetailPage() {
                   ))}
               </div>
             ))}
-
           </div>
 
-          {/* Action */}
-          <div className="border-t px-4 py-3">
-            <div className="flex gap-4 mb-2">
-              <Heart
-                size={24}
-                onClick={() => setLiked(!liked)}
-                className={
-                  liked
-                    ? "fill-red-500 text-red-500"
-                    : "text-[#262626]"
-                }
-              />
-              <MessageCircle size={24} />
-              <Share2 size={24} />
-              <Bookmark size={24} className="ml-auto" />
+          {/* Comment input */}
+          {replyUsername && (
+            <div className="px-3 py-1 text-xs text-[#737373] flex items-center gap-1 bg-[#fafafa] border-t border-[#efefef]">
+              <span>Membalas</span>
+              <span className="font-semibold text-[#262626]">@{replyUsername}</span>
+              <button onClick={() => { setReplyTo(null); setReplyUsername(null) }} className="ml-1 text-[#ed4956] font-semibold">
+                Batal
+              </button>
             </div>
+          )}
 
-            {replyUsername && (
-              <div className="text-xs text-[#8e8e8e] mb-1">
-                Membalas{" "}
-                <span className="font-semibold">
-                  @{replyUsername}
-                </span>
-                <button
-                  onClick={() => {
-                    setReplyTo(null)
-                    setReplyUsername(null)
-                  }}
-                  className="ml-2 text-red-500"
-                >
-                  Batal
-                </button>
-              </div>
-            )}
-
-            <div className="flex items-center gap-3">
-              <input
-                ref={inputRef}
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && handleSubmitComment()
-                }
-                placeholder="Tambahkan komentar..."
-                className="flex-1 text-sm outline-none"
-              />
-
+          <div className="flex items-center gap-3 px-3 py-3 border-t border-[#dbdbdb]">
+            <input
+              ref={inputRef}
+              type="text"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSubmitComment()}
+              placeholder="Tambahkan komentar..."
+              className="flex-1 text-sm text-[#262626] placeholder-[#737373] outline-none bg-transparent"
+            />
+            {newComment.trim() && (
               <button
                 onClick={handleSubmitComment}
                 className="text-[#0095f6] font-semibold text-sm"
               >
                 Kirim
               </button>
-            </div>
-
+            )}
           </div>
+
+          {/* bottom nav spacing */}
+          <div className="h-[49px]" />
         </div>
       </div>
-    </>
+    </div>
   )
 }

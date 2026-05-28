@@ -105,61 +105,70 @@ export default function NotificationPage() {
   ]
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold">Notifikasi</h1>
+    <div className="min-h-screen bg-[#fafafa] lg:ml-[244px] xl:ml-[335px]">
+      {/* mobile top spacing */}
+      <div className="h-[54px] lg:hidden" />
+
+      <div className="max-w-[600px] mx-auto px-4 pt-6 pb-20 lg:pb-6">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
+          <h1 className="text-base font-semibold text-[#262626]">Notifikasi</h1>
           {unreadCount > 0 && (
-            <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-              {unreadCount} baru
+            <span className="bg-[#ff3040] text-white text-[10px] font-bold rounded-full px-[7px] py-[1px] leading-none">
+              {unreadCount}
             </span>
           )}
         </div>
-      </div>
 
-      {/* Filter Tab */}
-      <div className="flex gap-2 mb-6 overflow-x-auto">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setFilter(tab.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition ${
-              filter === tab.value
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Grouped List */}
-      {filtered.length === 0 ? (
-        <div className="text-center text-gray-400 py-10">
-          <p>Belum ada notifikasi</p>
+        {/* Filter pill tabs */}
+        <div className="flex gap-2 mb-5 overflow-x-auto pb-1 scrollbar-none">
+          {tabs.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setFilter(tab.value)}
+              className={`px-4 py-[7px] rounded-full text-xs font-semibold whitespace-nowrap transition-colors border ${
+                filter === tab.value
+                  ? "bg-[#262626] text-white border-[#262626]"
+                  : "bg-white text-[#262626] border-[#dbdbdb] hover:bg-[#f0f0f0]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
-      ) : (
-        groups.map((group) => {
-          const items = filtered.filter((n) => getGroup(n.created_at) === group)
-          if (items.length === 0) return null
-          return (
-            <div key={group} className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">{group}</h2>
-              <div className="flex flex-col gap-2">
-                {items.map((notif) => (
-                  <NotificationItem
-                    key={notif.id}
-                    notification={notif}
-                    onMarkAsRead={handleMarkAsRead}
-                  />
-                ))}
+
+        {/* Grouped notification list */}
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-[#262626] font-semibold">Belum ada notifikasi</p>
+            <p className="text-sm text-[#737373]">Aktivitas dari orang lain akan muncul di sini.</p>
+          </div>
+        ) : (
+          groups.map((group) => {
+            const items = filtered.filter((n) => getGroup(n.created_at) === group)
+            if (items.length === 0) return null
+            return (
+              <div key={group} className="mb-5">
+                <h2 className="text-xs font-semibold text-[#737373] mb-2 uppercase tracking-wide">
+                  {group}
+                </h2>
+                <div className="flex flex-col">
+                  {items.map((notif) => (
+                    <NotificationItem
+                      key={notif.id}
+                      notification={notif}
+                      onMarkAsRead={handleMarkAsRead}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )
-        })
-      )}
+            )
+          })
+        )}
+      </div>
+
+      {/* mobile bottom spacing */}
+      <div className="h-[49px] lg:hidden" />
     </div>
   )
 }

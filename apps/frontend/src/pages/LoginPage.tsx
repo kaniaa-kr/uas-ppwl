@@ -48,53 +48,81 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm">
-        <div className="text-center mb-6">
-          <h1 className="text-4xl mb-2">📸</h1>
-          <h2 className="text-2xl font-bold">Instagram Clone</h2>
-          <p className="text-gray-500 text-sm mt-1">Minggu 15 PPWL</p>
-        </div>
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center px-4">
+      {/* Card */}
+      <div className="w-full max-w-[350px] bg-white border border-[#dbdbdb] px-10 py-10 flex flex-col items-center">
+        {/* Logo */}
+        <h1
+          className="text-[#262626] mb-8 select-none"
+          style={{
+            fontFamily: "Billabong, Georgia, serif",
+            fontStyle: "italic",
+            fontWeight: 700,
+            fontSize: "2.4rem",
+            lineHeight: 1,
+          }}
+        >
+          Instagram
+        </h1>
 
-        <div className="flex flex-col gap-3">
+        {/* Form */}
+        <div className="w-full flex flex-col gap-[6px]">
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Nomor telepon, nama pengguna, atau email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Kata sandi"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full bg-[#fafafa] border border-[#dbdbdb] rounded-[3px] px-3 py-[9px] text-xs text-[#262626] placeholder-[#8e8e8e] outline-none focus:border-[#a8a8a8] transition-colors"
           />
           <button
             onClick={handleLogin}
-            disabled={loading}
-            className="bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 disabled:opacity-50 transition"
+            disabled={loading || !email || !password}
+            className="w-full mt-2 bg-[#0095f6] text-white text-sm font-semibold py-[7px] rounded-lg disabled:opacity-40 transition-opacity"
           >
             {loading ? "Sedang masuk..." : "Masuk"}
           </button>
         </div>
 
-        <div className="my-4 flex items-center gap-2">
-          <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="text-gray-400 text-xs">atau</span>
-          <div className="flex-1 h-px bg-gray-300"></div>
+        {/* Divider */}
+        <div className="w-full flex items-center gap-4 my-5">
+          <div className="flex-1 h-px bg-[#dbdbdb]" />
+          <span className="text-xs font-semibold text-[#8e8e8e] tracking-widest">ATAU</span>
+          <div className="flex-1 h-px bg-[#dbdbdb]" />
         </div>
 
-        <p className="text-center text-sm text-gray-600">
+        {/* Forgot password */}
+        <Link
+          to="/forgot-password"
+          className="text-xs text-[#00376b] hover:text-[#262626] transition-colors"
+        >
+          Lupa kata sandi?
+        </Link>
+      </div>
+
+      {/* Register link */}
+      <div className="w-full max-w-[350px] mt-2.5 bg-white border border-[#dbdbdb] px-10 py-5 flex items-center justify-center">
+        <p className="text-sm text-[#262626]">
           Belum punya akun?{" "}
-          <Link to="/register" className="text-blue-500 font-semibold hover:underline">
-            Daftar di sini
+          <Link
+            to="/register"
+            className="text-[#0095f6] font-semibold hover:text-[#00376b] transition-colors"
+          >
+            Daftar
           </Link>
         </p>
       </div>
+
+      {/* App download hint */}
+      <p className="mt-4 text-sm text-[#262626]">Dapatkan aplikasinya.</p>
     </div>
   )
 }

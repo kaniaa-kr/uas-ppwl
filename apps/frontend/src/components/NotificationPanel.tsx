@@ -82,26 +82,33 @@ export default function NotificationPanel({ onClose }: Props) {
   ]
 
   return (
-    <div className="fixed top-0 left-20 h-screen w-96  bg-white border-r shadow-xl z-30 flex flex-col">
+    /* Positioned right of the sidebar (left: sidebar width) */
+    <div className="fixed top-0 left-[244px] xl:left-[335px] h-screen w-[397px] bg-white border-r border-[#dbdbdb] z-40 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b">
-        <h2 className="text-xl font-bold">Notifikasi</h2>
-        <button onClick={onClose} className="hover:bg-gray-100 p-1 rounded-full">
-          <X size={20} />
+      <div className="flex items-center justify-between px-6 py-5 border-b border-[#dbdbdb]">
+        <h2 className="text-base font-semibold text-[#262626]">Notifikasi</h2>
+        <button
+          onClick={onClose}
+          className="text-[#262626] hover:text-[#737373] transition-colors p-1 rounded-full hover:bg-[#f0f0f0]"
+          aria-label="Tutup"
+        >
+          <X size={20} strokeWidth={1.5} />
         </button>
       </div>
 
-      {/* List notifikasi */}
-      <div className="overflow-y-auto flex-1 px-4 py-4">
+      {/* Notification list */}
+      <div className="overflow-y-auto flex-1 py-2">
         {groups.map((group) => {
           const items = notifications.filter(
             (n) => getGroup(n.created_at) === group
           )
           if (items.length === 0) return null
           return (
-            <div key={group} className="mb-6">
-              <h3 className="text-sm font-semibold text-gray-500 mb-3">{group}</h3>
-              <div className="flex flex-col gap-1">
+            <div key={group} className="mb-4">
+              <h3 className="text-xs font-semibold text-[#737373] px-6 py-2 uppercase tracking-wide">
+                {group}
+              </h3>
+              <div className="flex flex-col">
                 {items.map((notif) => (
                   <NotificationItem
                     key={notif.id}

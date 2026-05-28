@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Heart, MessageCircle, Share2 } from "lucide-react"
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from "lucide-react"
 
 type PostCardProps = {
   id: string
@@ -23,56 +23,101 @@ export default function PostCard({
   comments,
 }: PostCardProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden hover:shadow-md transition">
-      {/* Header */}
-      <div className="flex items-center gap-3 p-4">
-        <img
-          src={
-            user.avatar_url ||
-            `https://ui-avatars.com/api/?name=${user.name}`
-          }
-          alt={user.name}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex-1">
-          <p className="font-semibold text-sm">{user.name}</p>
-          <p className="text-xs text-gray-400">@{user.username}</p>
+    <article className="bg-white border-b border-[#dbdbdb] lg:border lg:border-[#dbdbdb] lg:mb-6">
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-3 py-[10px]">
+        <div className="flex items-center gap-[11px] min-w-0">
+          {/* Avatar with gradient ring */}
+          <div className="flex-shrink-0 w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600">
+            <div className="w-full h-full rounded-full bg-white p-[1.5px]">
+              <img
+                src={
+                  user.avatar_url ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&size=64&background=e0e0e0&color=757575`
+                }
+                alt={user.name}
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-[#262626] truncate leading-snug">
+              {user.username}
+            </p>
+          </div>
         </div>
+        <button
+          className="text-[#262626] hover:text-[#737373] transition-colors p-1 -mr-1"
+          aria-label="Opsi lainnya"
+        >
+          <MoreHorizontal size={20} strokeWidth={1.5} />
+        </button>
       </div>
 
-      {/* Gambar */}
+      {/* ── Image — edge-to-edge, no rounded corners ────────────────── */}
       {image_url && (
-        <img
-          src={image_url}
-          alt="post"
-          className="w-full aspect-square object-cover"
-        />
+        <div className="w-full aspect-square overflow-hidden bg-[#000]">
+          <img
+            src={image_url}
+            alt={`Post oleh ${user.username}`}
+            className="w-full h-full object-cover"
+          />
+        </div>
       )}
 
-      {/* Konten */}
-      <div className="p-4">
-        <p className="text-sm text-gray-800 line-clamp-3">{content}</p>
+      {/* ── Action icons row ────────────────────────────────────────── */}
+      <div className="flex items-center justify-between px-3 pt-[10px] pb-[6px]">
+        {/* Left: Like / Comment / Share — no counts */}
+        <div className="flex items-center gap-4">
+          <button
+            aria-label="Suka"
+            className="text-[#262626] hover:text-[#737373] transition-colors active:scale-90 transition-transform"
+          >
+            <Heart size={24} strokeWidth={1.5} />
+          </button>
+          <Link
+            to={`/post/${id}`}
+            aria-label="Komentar"
+            className="text-[#262626] hover:text-[#737373] transition-colors"
+          >
+            <MessageCircle size={24} strokeWidth={1.5} />
+          </Link>
+          <button
+            aria-label="Bagikan"
+            className="text-[#262626] hover:text-[#737373] transition-colors"
+          >
+            <Send size={24} strokeWidth={1.5} />
+          </button>
+        </div>
+
+        {/* Right: Bookmark */}
+        <button aria-label="Simpan" className="text-[#262626] hover:text-[#737373] transition-colors">
+          <Bookmark size={24} strokeWidth={1.5} />
+        </button>
       </div>
 
-      {/* Footer: Actions */}
-      <div className="px-4 pb-4 flex items-center gap-4 text-gray-500 border-t">
-        <button className="flex items-center gap-1 hover:text-red-500 transition py-2 flex-1 justify-center">
-          <Heart size={20} />
-          <span className="text-sm font-semibold">{likes}</span>
-        </button>
-
-        <Link
-          to={`/post/${id}`}
-          className="flex items-center gap-1 hover:text-blue-500 transition py-2 flex-1 justify-center"
-        >
-          <MessageCircle size={20} />
-          <span className="text-sm font-semibold">{comments}</span>
-        </Link>
-
-        <button className="flex items-center gap-1 hover:text-green-500 transition py-2 flex-1 justify-center">
-          <Share2 size={20} />
-        </button>
+      {/* ── Likes count ─────────────────────────────────────────────── */}
+      <div className="px-3 pt-[2px]">
+        <p className="text-sm font-semibold text-[#262626] leading-snug">
+          {likes.toLocaleString("id-ID")} suka
+        </p>
       </div>
-    </div>
+
+      {/* ── Caption with bold username ───────────────────────────────── */}
+      <div className="px-3 pt-1 pb-3">
+        <p className="text-sm text-[#262626] leading-snug">
+          <span className="font-semibold mr-1">{user.username}</span>
+          {content}
+        </p>
+        {comments > 0 && (
+          <Link
+            to={`/post/${id}`}
+            className="block mt-1 text-sm text-[#737373] hover:text-[#262626] transition-colors"
+          >
+            Lihat semua {comments} komentar
+          </Link>
+        )}
+      </div>
+    </article>
   )
 }
