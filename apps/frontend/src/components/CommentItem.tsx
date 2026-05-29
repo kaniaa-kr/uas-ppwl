@@ -64,7 +64,7 @@ export default function CommentItem({
               e.stopPropagation()
               navigate(`/profile/${targetUsername}`)
             }}
-            className="text-[#00376b] dark:text-[#0095f6] font-medium cursor-pointer hover:underline"
+            className="text-[#00376b] dark:text-[#e0f1ff] font-normal cursor-pointer hover:underline"
           >
             {part}
           </span>
@@ -86,49 +86,61 @@ export default function CommentItem({
 
   return (
     <>
-      <div className={`flex items-start gap-[14px] py-[8px] ${parentId ? "ml-[46px]" : ""}`}>
+      <div className={`flex items-start gap-3 py-2 px-4 w-full select-none ${parentId ? "pl-[54px]" : ""}`}>
+        
         {/* Avatar */}
-        <img
-          src={
-            author?.avatar_url ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(author?.name || "Deleted User")}&size=64&background=e0e0e0&color=757575`
-          }
-          alt={author?.name || "Deleted User"}
-          onClick={goToProfile}
-          className={`w-[32px] h-[32px] rounded-full object-cover flex-shrink-0 mt-0.5 ${
-            author?.username ? "cursor-pointer hover:opacity-80" : ""
-          }`}
-        />
+        <div className="flex-shrink-0 mt-0.5">
+          <img
+            src={
+              author?.avatar_url ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(author?.name || "Deleted User")}&size=64&background=e0e0e0&color=757575`
+            }
+            alt={author?.name || "Deleted User"}
+            onClick={goToProfile}
+            className={`w-8 h-8 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10 ${
+              author?.username ? "cursor-pointer hover:opacity-90 active:opacity-80" : ""
+            }`}
+          />
+        </div>
 
-        {/* Text block */}
-        <div className="flex-1 min-w-0">
-          <p className="text-[14px] text-[#262626] leading-snug">
+        {/* Blok teks isi komentar & metadata */}
+        <div className="flex-1 min-w-0 text-[14px] leading-tight">
+          <div className="inline break-words text-neutral-900 dark:text-neutral-100">
             <span
               onClick={goToProfile}
-              className={`font-semibold mr-1 ${author?.username ? "cursor-pointer hover:text-gray-500" : ""}`}
+              className={`font-semibold text-neutral-950 dark:text-neutral-50 mr-2 inline-block ${
+                author?.username ? "cursor-pointer hover:text-neutral-500 dark:hover:text-neutral-400" : ""
+              }`}
             >
               {displayName}
             </span>
             {renderCommentContent(content)}
-          </p>
-          <div className="flex items-center gap-[12px] mt-[6px]">
-            <span className="text-[12px] text-[#737373]">{timeAgo(createdAt)}</span>
+          </div>
+
+          {/* Baris interaksi (Waktu, Suka, Balas, Hapus) */}
+          <div className="flex items-center gap-3 mt-2 text-[12px] font-medium text-neutral-500 dark:text-neutral-400 tracking-wide">
+            <span>{timeAgo(createdAt)}</span>
+            
             {likeCount > 0 && (
-              <span className="text-[12px] font-semibold text-[#737373]">{likeCount} suka</span>
+              <span className="font-semibold text-neutral-600 dark:text-neutral-300">
+                {likeCount} suka
+              </span>
             )}
+            
             {/* ✅ FIX 2: Hapus !parentId — tombol Balas muncul di semua comment */}
             {author?.username && (
               <button
                 onClick={handleReply}
-                className="text-[12px] font-semibold text-[#737373] hover:text-[#262626] transition-colors"
+                className="hover:text-neutral-800 dark:hover:text-neutral-200 font-semibold transition-colors"
               >
                 Balas
               </button>
             )}
+            
             {isOwner && onDelete && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="text-[12px] font-semibold text-[#737373] hover:text-[#ed4956] transition-colors"
+                className="hover:text-[#ed4956] dark:hover:text-[#ed4956] font-semibold transition-colors"
               >
                 Hapus
               </button>
@@ -136,45 +148,51 @@ export default function CommentItem({
           </div>
         </div>
 
-        {/* Like button */}
+        {/* Tombol suka (Icon Heart kanan) */}
         <button
           onClick={() => {
             setLiked((v) => !v)
             setLikeCount((c) => (liked ? c - 1 : c + 1))
           }}
-          className="pt-1 flex-shrink-0 active:scale-90 transition-transform"
+          className="pt-1.5 flex-shrink-0 active:scale-90 transition-transform text-neutral-400 dark:text-neutral-500"
         >
           <Heart
-            size={12}
-            className={liked ? "fill-[#ff3040] text-[#ff3040]" : "text-[#737373] hover:text-[#262626]"}
+            size={13}
+            className={liked ? "fill-[#ff3040] text-[#ff3040]" : "hover:text-neutral-600 dark:hover:text-neutral-300"}
             fill={liked ? "currentColor" : "none"}
           />
         </button>
       </div>
 
-      {/* Konfirmasi hapus */}
+      {/* Modal Dialog Konfirmasi Hapus */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl w-[260px] overflow-hidden shadow-xl">
-            <div className="px-4 py-4 border-b border-[#dbdbdb] text-center">
-              <p className="text-[14px] font-semibold text-[#262626]">Hapus komentar?</p>
-              <p className="text-[12px] text-[#737373] mt-1">Tindakan ini tidak dapat dibatalkan.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-[1px]">
+          <div className="bg-white dark:bg-[#262626] rounded-xl w-[260px] overflow-hidden shadow-2xl border border-neutral-200/10 scale-up">
+            
+            <div className="px-6 py-6 border-b border-neutral-200 dark:border-neutral-800 text-center">
+              <p className="text-[16px] font-semibold text-neutral-950 dark:text-neutral-50">Hapus komentar?</p>
+              <p className="text-[14px] text-neutral-500 dark:text-neutral-400 mt-1.5 leading-snug">
+                Tindakan ini tidak dapat dibatalkan.
+              </p>
             </div>
+            
             <button
               onClick={() => {
                 onDelete?.(id)
                 setShowDeleteConfirm(false)
               }}
-              className="w-full py-3 text-[14px] font-semibold text-[#ed4956] border-b border-[#dbdbdb] hover:bg-[#fafafa]"
+              className="w-full py-3.5 text-[14px] font-bold text-[#ed4956] active:bg-neutral-100 dark:active:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-800 transition-colors"
             >
               Hapus
             </button>
+            
             <button
               onClick={() => setShowDeleteConfirm(false)}
-              className="w-full py-3 text-[14px] text-[#262626] hover:bg-[#fafafa]"
+              className="w-full py-3.5 text-[14px] font-normal text-neutral-900 dark:text-neutral-100 active:bg-neutral-100 dark:active:bg-neutral-800 transition-colors"
             >
               Batal
             </button>
+            
           </div>
         </div>
       )}

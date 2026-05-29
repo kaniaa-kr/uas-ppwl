@@ -1,613 +1,307 @@
-import { useEffect, useState, useRef } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { useAuthStore } from "../stores/auth.store"
 import Navbar from "../components/Navbar"
-import CommentItem from "../components/CommentItem"
 import { toast } from "sonner"
-import {
-  Heart,
-  MessageCircle,
-  Send,
-  Bookmark,
-  MoreHorizontal,
-  ArrowLeft,
-  Smile,
-  Trash2,
-} from "lucide-react"
+import { Heart, MessageCircle, Trash2, ArrowLeft } from "lucide-react"
 
 const API_URL = import.meta.env.VITE_API_URL
 
-type Comment = {
-  id: string
-  post_id: string
-  user_id: string
-  content: string
-  created_at: string
-  parent_id: string | null
-  user: {
-    id: string
-    name: string
-    username: string
-    avatar_url: string | null
-  } | null
-}
-
-function timeAgo(dateStr: string): string {
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
-  if (diff < 60) return "Baru saja"
-  if (diff < 3600) return `${Math.floor(diff / 60)} menit yang lalu`
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam yang lalu`
-  if (diff < 604800) return `${Math.floor(diff / 86400)} hari yang lalu`
-  return new Date(dateStr).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  })
-}
-
 export default function PostDetailPage() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const user = useAuthStore((s) => s.user)
+  const currentUser = useAuthStore((s) => s.user)
   const token = useAuthStore((s) => s.token)
+
   const [post, setPost] = useState<any>(null)
-  const [comments, setComments] = useState<Comment[]>([])
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const [comments, setComments] = useState<any[]>([])
   const [newComment, setNewComment] = useState("")
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [replyTo, setReplyTo] = useState<string | null>(null)
-  const [replyUsername, setReplyUsername] = useState<string | null>(null)
-  const [liked, setLiked] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
-  const [likeLoading, setLikeLoading] = useState(false)
-  const [showMenu, setShowMenu] = useState(false)
+  const [submittingComment, setSubmittingComment] = useState(false)
 
   useEffect(() => {
-    if (!id) return
-    const fetchPost = async () => {
+    const fetchPostDetails = async () => {
       try {
         const res = await fetch(`${API_URL}/posts/${id}`)
-        if (!res.ok) throw new Error("Post tidak ditemukan")
+        if (!res.ok) throw new Error("Kiriman tidak ditemukan")
         const data = await res.json()
         setPost(data)
-        setLikesCount(data._count?.likes ?? 0)
-      } catch (error) {
-        toast.error("Gagal load post")
-      }
-    }
-    const fetchComments = async () => {
-      try {
-        const res = await fetch(`${API_URL}/comments/post/${id}`)
-        if (!res.ok) throw new Error()
-        const data = await res.json()
-        setComments(data)
-      } catch (error) {
-        toast.error("Gagal load komentar")
-      }
-    }
-    Promise.all([fetchPost(), fetchComments()]).finally(() => setLoading(false))
-  }, [id])
+        setLikesCount(data.likes ?? 0)
+        
+        // Cek status like
+        if (currentUser && token) {
+          const likeRes = await fetch(`${API_URL}/posts/${id}/like-status`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (likeRes.ok) {
+            const likeData = await likeRes.json()
+            setIsLiked(likeData.is_liked)
+          }
+        }
 
-  const handleReply = (commentId: string, username: string) => {
-    setReplyTo(commentId)
-    setNewComment(`@${username} `)
-    setReplyUsername(username)
-    inputRef.current?.focus()
+        // Fetch comments
+        const commentsRes = await fetch(`${API_URL}/posts/${id}/comments`)
+        if (commentsRes.ok) {
+          const commentsData = await commentsRes.json()
+          setComments(commentsData)
+        }
+      } catch (error: any) {
+        toast.error(error.message || "Gagal memuat kiriman")
+        navigate("/")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) fetchPostDetails()
+  }, [id, currentUser, token, navigate])
+
+  const handleDeletePost = async () => {
+    if (!confirm("Yakin ingin menghapus kiriman ini?")) return
+    try {
+      const res = await fetch(`${API_URL}/posts/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!res.ok) throw new Error("Gagal menghapus kiriman")
+      toast.success("Kiriman berhasil dihapus")
+      navigate(`/profile/${currentUser?.username}`)
+    } catch (error: any) {
+      toast.error(error.message)
+    }
   }
 
-  const handleLike = async () => {
-    if (!token || likeLoading) return
-    setLikeLoading(true)
-    const wasLiked = liked
-    setLiked(!wasLiked)
-    setLikesCount((c) => (wasLiked ? c - 1 : c + 1))
+  const handleToggleLike = async () => {
+    if (!currentUser) return toast.error("Silakan login terlebih dahulu")
+    
+    // Optimistic UI update
+    const previousIsLiked = isLiked
+    const previousLikesCount = likesCount
+    
+    setIsLiked(!isLiked)
+    setLikesCount(prev => isLiked ? prev - 1 : prev + 1)
+
     try {
       const res = await fetch(`${API_URL}/posts/${id}/like`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       })
       if (!res.ok) throw new Error()
-      const data = await res.json()
-      setLiked(data.liked)
     } catch {
-      setLiked(wasLiked)
-      setLikesCount((c) => (wasLiked ? c + 1 : c - 1))
-      toast.error("Gagal update like")
-    } finally {
-      setLikeLoading(false)
+      // Revert if failed
+      setIsLiked(previousIsLiked)
+      setLikesCount(previousLikesCount)
+      toast.error("Gagal menyukai kiriman")
     }
   }
 
-  const handleSubmitComment = async () => {
-    if (!newComment.trim() || !user || !token || !id || submitting) return
-    setSubmitting(true)
-    const tempComment: Comment = {
-      id: `temp-${Date.now()}`,
-      content: newComment,
-      created_at: new Date().toISOString(),
-      parent_id: replyTo,
-      user: {
-        id: user.id,
-        name: user.name,
-        username: user.username,
-        avatar_url: user.avatar_url ?? null,
-      },
-      post_id: id || "",
-      user_id: user.id,
-    }
-    setComments((prev) => [...prev, tempComment])
-    const commentText = newComment
-    setNewComment("")
-    setReplyTo(null)
-    setReplyUsername(null)
+  const handlePostComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!newComment.trim() || !currentUser) return
+
+    setSubmittingComment(true)
     try {
-      const res = await fetch(`${API_URL}/comments`, {
+      const res = await fetch(`${API_URL}/posts/${id}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          post_id: id,
-          content: commentText,
-          ...(replyTo ? { parent_id: replyTo } : {}),
-        }),
+        body: JSON.stringify({ content: newComment.trim() }),
       })
-      if (!res.ok) throw new Error()
-      const saved = await res.json()
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === tempComment.id ? { ...saved, parent_id: saved.parent_id ?? null } : c
-        )
-      )
-    } catch {
-      setComments((prev) => prev.filter((c) => c.id !== tempComment.id))
-      setNewComment(commentText)
-      toast.error("Gagal mengirim komentar")
+      
+      if (!res.ok) throw new Error("Gagal mengirim komentar")
+      const addedComment = await res.json()
+      
+      // Inject user object agar langsung muncul tanpa direfresh
+      const commentWithUser = { ...addedComment, user: currentUser }
+      setComments((prev) => [...prev, commentWithUser])
+      setNewComment("")
+    } catch (error: any) {
+      toast.error(error.message)
     } finally {
-      setSubmitting(false)
+      setSubmittingComment(false)
     }
   }
-
-  const handleDeletePost = async () => {
-    if (!token) return
-    if (!confirm("Hapus postingan ini?")) return
-    setShowMenu(false)
-    try {
-      const res = await fetch(`${API_URL}/posts/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (!res.ok) throw new Error()
-      toast.success("Postingan dihapus")
-      navigate("/")
-    } catch {
-      toast.error("Gagal menghapus postingan")
-    }
-  }
-
-  const handleDeleteComment = async (commentId: string) => {
-    if (!token) return
-    try {
-      await fetch(`${API_URL}/comments/${commentId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      setComments((prev) => prev.filter((c) => c.id !== commentId))
-      toast.success("Komentar dihapus")
-    } catch {
-      toast.error("Gagal menghapus komentar")
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black">
-        <Navbar />
-        <div className="flex justify-center items-center h-screen">
-          <div className="w-8 h-8 rounded-full border-2 border-[#363636] border-t-[#737373] animate-spin" />
-        </div>
-      </div>
-    )
-  }
-
-  if (!post) {
-    return (
-      <div className="min-h-screen bg-black">
-        <Navbar />
-        <div className="text-center pt-32 text-[#737373]">Postingan tidak ditemukan</div>
-      </div>
-    )
-  }
-
-  const isOwner = user?.id === post.user.id
-  const rootComments = comments.filter((c) => !c.parent_id)
-  const replies = comments.filter((c) => c.parent_id)
-
-  // ── Shared: Action bar & comment input ──
-  const ActionBar = (
-    <div className="border-t border-[#262626] flex-shrink-0 bg-black">
-      <div className="flex items-center justify-between px-4 pt-3 pb-2">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleLike}
-            disabled={likeLoading}
-            aria-label="Suka"
-            className={`transition-transform active:scale-90 ${likeLoading ? "opacity-50" : ""}`}
-          >
-            <Heart
-              size={26}
-              strokeWidth={1.5}
-              className={liked ? "text-[#ff3040]" : "text-white hover:text-[#737373]"}
-              fill={liked ? "currentColor" : "none"}
-              style={{ transition: "fill 0.15s, color 0.15s" }}
-            />
-          </button>
-          <button
-            aria-label="Komentar"
-            className="text-white hover:text-[#737373] transition-colors"
-            onClick={() => inputRef.current?.focus()}
-          >
-            <MessageCircle size={26} strokeWidth={1.5} style={{ transform: "scaleX(-1)" }} />
-          </button>
-          <button aria-label="Bagikan" className="text-white hover:text-[#737373] transition-colors">
-            <Send size={26} strokeWidth={1.5} />
-          </button>
-        </div>
-        <button aria-label="Simpan" className="text-white hover:text-[#737373] transition-colors">
-          <Bookmark size={26} strokeWidth={1.5} />
-        </button>
-      </div>
-
-      <p className="px-4 text-[14px] font-semibold text-white pb-[6px]">
-        {likesCount.toLocaleString("id-ID")} suka
-      </p>
-      <p className="px-4 text-[11px] text-[#737373] uppercase mb-3 tracking-wider">
-        {timeAgo(post.created_at)}
-      </p>
-
-      {replyUsername && (
-        <div className="px-4 py-2 text-xs text-[#737373] flex items-center justify-between bg-[#0d0d0d] border-t border-[#262626]">
-          <div>
-            <span>Membalas </span>
-            <span className="font-semibold text-white">@{replyUsername}</span>
-          </div>
-          <button
-            onClick={() => { setReplyTo(null); setReplyUsername(null) }}
-            className="text-white font-semibold text-[10px]"
-          >
-            BATAL
-          </button>
-        </div>
-      )}
-
-      <div className="flex items-center gap-3 px-4 py-3 border-t border-[#262626]">
-        <button className="text-[#737373]">
-          <Smile size={24} strokeWidth={1.5} />
-        </button>
-        <input
-          ref={inputRef}
-          type="text"
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSubmitComment()}
-          placeholder="Tambahkan komentar..."
-          disabled={submitting}
-          className="flex-1 text-[14px] text-white placeholder-[#6b6b6b] outline-none bg-transparent h-[24px] disabled:opacity-50"
-        />
-        {newComment.trim() && (
-          <button
-            onClick={handleSubmitComment}
-            disabled={submitting}
-            className="text-[#0095f6] font-semibold text-[14px] hover:text-white transition-colors disabled:opacity-50"
-          >
-            {submitting ? "..." : "Kirim"}
-          </button>
-        )}
-      </div>
-    </div>
-  )
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-neutral-50 dark:bg-black text-neutral-950 dark:text-neutral-50 transition-colors duration-200">
       <Navbar />
-      <div className="md:ml-[72px] lg:ml-[244px]">
-        <div className="h-[48px] md:hidden" />
 
-        {/* ── Desktop: split card layout ── */}
-        <div
-          className="hidden md:flex max-w-[935px] mx-auto mt-6 bg-black border border-[#262626] rounded-r-sm"
-          style={{ maxHeight: "calc(100vh - 80px)", minHeight: "450px" }}
-        >
-          {/* Left: Image */}
-          <div className="flex-1 bg-[#0a0a0a] flex items-center justify-center overflow-hidden">
-            {post.image_url ? (
-              <img
-                src={post.image_url}
-                alt={`Post oleh ${post.user.username}`}
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <div className="w-full h-full bg-[#0d0d0d] flex items-center justify-center border-r border-[#262626]">
-                <div className="text-center px-8">
-                  <p className="text-white font-semibold text-lg mb-1">{post.user.username}</p>
-                  <p className="text-[#737373] text-sm leading-snug break-words">{post.content}</p>
+      <div className="md:ml-[72px] lg:ml-[244px] pt-[48px] md:pt-0 pb-[48px] md:pb-0 flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-[1000px] p-0 md:p-6 lg:p-8">
+          
+          {loading ? (
+            // SKELETON
+            <div className="w-full flex flex-col md:flex-row bg-white dark:bg-neutral-950 md:border border-neutral-200 dark:border-neutral-800 md:rounded-sm overflow-hidden h-[calc(100vh-48px)] md:h-[600px] animate-pulse">
+              <div className="w-full md:w-[55%] lg:w-[60%] h-[50vh] md:h-full bg-neutral-200 dark:bg-neutral-900" />
+              <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col p-4 border-l border-neutral-200 dark:border-neutral-800">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+                  <div className="w-24 h-4 rounded bg-neutral-200 dark:bg-neutral-800" />
+                </div>
+                <div className="flex-1 space-y-3">
+                  <div className="w-3/4 h-3 bg-neutral-200 dark:bg-neutral-800 rounded" />
+                  <div className="w-1/2 h-3 bg-neutral-200 dark:bg-neutral-800 rounded" />
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Right: Comments panel */}
-          <div
-            className="w-[335px] lg:w-[405px] flex flex-col border-l border-[#262626]"
-            style={{ maxHeight: "calc(100vh - 80px)" }}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-[14px] border-b border-[#262626] flex-shrink-0">
-              <div className="flex items-center gap-[14px]">
-                <div className="w-[32px] h-[32px] rounded-full p-[1.5px] bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] to-[#d62976]">
-                  <div className="w-full h-full rounded-full bg-black p-[1px]">
-                    <img
-                      src={
-                        post.user.avatar_url ||
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=262626&color=ffffff`
-                      }
-                      alt={post.user.name}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  </div>
-                </div>
-                <span className="text-[14px] font-semibold text-white hover:text-[#a0a0a0] cursor-pointer">
-                  {post.user.username}
-                </span>
-              </div>
-
-              <div className="relative">
-                <button
-                  onClick={() => setShowMenu((v) => !v)}
-                  className="text-white hover:text-[#737373] transition-colors p-1"
+            </div>
+          ) : !post ? (
+            // NOT FOUND
+            <div className="text-center py-20">
+              <h2 className="text-xl font-bold">Kiriman tidak ditemukan</h2>
+              <button onClick={() => navigate("/")} className="mt-4 text-[#0095f6] font-semibold hover:underline">
+                Kembali ke Beranda
+              </button>
+            </div>
+          ) : (
+            // MAIN CONTENT (IG Desktop Style)
+            <div className="w-full flex flex-col md:flex-row bg-white dark:bg-black md:border border-neutral-200 dark:border-neutral-800 md:rounded-sm overflow-hidden min-h-[calc(100vh-48px)] md:min-h-0 md:h-[600px] lg:h-[700px]">
+              
+              {/* Kiri: Gambar Kiriman */}
+              <div className="w-full md:w-[55%] lg:w-[60%] bg-neutral-100 dark:bg-neutral-950 flex items-center justify-center relative">
+                {/* Back button untuk mobile */}
+                <button 
+                  onClick={() => navigate(-1)}
+                  className="md:hidden absolute top-4 left-4 z-10 w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full backdrop-blur-sm"
                 >
-                  <MoreHorizontal size={20} strokeWidth={1.5} />
+                  <ArrowLeft size={20} />
                 </button>
-                {showMenu && isOwner && (
-                  <div className="absolute right-0 top-8 bg-[#1a1a1a] border border-[#363636] rounded-xl shadow-xl z-10 min-w-[160px] overflow-hidden">
-                    <button
-                      onClick={handleDeletePost}
-                      className="w-full text-left px-4 py-3 text-[14px] text-[#ff3040] flex items-center gap-2 hover:bg-[#262626] transition-colors"
-                    >
-                      <Trash2 size={14} />
-                      Hapus Postingan
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Caption + Comments scrollable */}
-            <div className="flex-1 overflow-y-auto px-4 py-4" style={{ scrollbarWidth: "none" }}>
-              {/* Caption */}
-              <div className="flex gap-[14px] mb-4 pb-4">
                 <img
-                  src={
-                    post.user.avatar_url ||
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=262626&color=ffffff`
-                  }
-                  alt={post.user.name}
-                  className="w-[32px] h-[32px] rounded-full object-cover flex-shrink-0 mt-0.5"
+                  src={post.image_url}
+                  alt="Post content"
+                  className="w-full h-full object-contain md:object-cover"
                 />
-                <p className="text-[14px] text-[#f5f5f5] leading-snug">
-                  <span className="font-semibold text-white mr-1 hover:text-[#a0a0a0] cursor-pointer">
-                    {post.user.username}
-                  </span>
-                  {post.content}
-                </p>
               </div>
 
-              {/* Comments */}
-              {rootComments.map((comment) => (
-                <div key={comment.id}>
-                  <CommentItem
-                    id={comment.id}
-                    author={comment.user}
-                    content={comment.content}
-                    createdAt={comment.created_at}
-                    parentId={comment.parent_id}
-                    onReply={handleReply}
-                    onDelete={handleDeleteComment}
-                  />
-                  {replies
-                    .filter((r) => r.parent_id === comment.id)
-                    .map((reply) => (
-                      <CommentItem
-                        key={reply.id}
-                        id={reply.id}
-                        author={reply.user}
-                        content={reply.content}
-                        createdAt={reply.created_at}
-                        parentId={reply.parent_id}
-                        onReply={handleReply}
-                        onDelete={handleDeleteComment}
+              {/* Kanan: Sidebar Detail & Komentar */}
+              <div className="w-full md:w-[45%] lg:w-[40%] flex flex-col bg-white dark:bg-black border-l border-neutral-200 dark:border-neutral-800">
+                
+                {/* Header Kanan (Profil & Delete) */}
+                <div className="flex items-center justify-between p-3.5 border-b border-neutral-200 dark:border-neutral-800">
+                  <div className="flex items-center gap-3">
+                    <Link to={`/profile/${post.user.username}`} className="flex-shrink-0">
+                      <img
+                        src={post.user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&background=262626&color=ffffff`}
+                        alt={post.user.username}
+                        className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-800"
                       />
-                    ))}
+                    </Link>
+                    <Link to={`/profile/${post.user.username}`} className="text-sm font-semibold hover:text-neutral-500 transition-colors">
+                      {post.user.username}
+                    </Link>
+                  </div>
+                  {currentUser?.id === post.user_id && (
+                    <button 
+                      onClick={handleDeletePost}
+                      className="p-1.5 text-neutral-500 hover:text-red-500 transition-colors"
+                      title="Hapus kiriman"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
                 </div>
-              ))}
-            </div>
 
-            {ActionBar}
-          </div>
-        </div>
+                {/* Area Komentar & Caption (Scrollable) */}
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-5 hide-scrollbar">
+                  {/* Caption (ditampilkan seperti komentar pertama) */}
+                  {post.content && (
+                    <div className="flex gap-3">
+                      <Link to={`/profile/${post.user.username}`} className="flex-shrink-0 mt-1">
+                        <img
+                          src={post.user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&background=262626&color=ffffff`}
+                          alt={post.user.username}
+                          className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-800"
+                        />
+                      </Link>
+                      <div className="flex-1 text-sm pt-0.5">
+                        <Link to={`/profile/${post.user.username}`} className="font-semibold hover:underline mr-1.5">
+                          {post.user.username}
+                        </Link>
+                        <span className="whitespace-pre-wrap">{post.content}</span>
+                      </div>
+                    </div>
+                  )}
 
-        {/* ── Mobile: stacked layout ── */}
-        <div className="md:hidden bg-black min-h-screen">
-          {/* Mobile header */}
-          <div className="flex items-center justify-between px-4 h-[44px] border-b border-[#262626]">
-            <div className="flex items-center gap-6">
-              <button onClick={() => navigate(-1)} className="text-white">
-                <ArrowLeft size={24} strokeWidth={1.5} />
-              </button>
-              <span className="text-[16px] font-semibold text-white">Postingan</span>
-            </div>
-            {isOwner && (
-              <button onClick={handleDeletePost} className="text-[#ff3040] p-1">
-                <Trash2 size={20} strokeWidth={1.5} />
-              </button>
-            )}
-          </div>
-
-          {/* Post author row */}
-          <div className="flex items-center justify-between px-3 py-[10px]">
-            <div className="flex items-center gap-[10px]">
-              <div className="w-8 h-8 rounded-full p-[2px] bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] to-[#d62976]">
-                <div className="w-full h-full rounded-full bg-black p-[1.5px]">
-                  <img
-                    src={
-                      post.user.avatar_url ||
-                      `https://ui-avatars.com/api/?name=${encodeURIComponent(post.user.name)}&size=64&background=262626&color=ffffff`
-                    }
-                    alt={post.user.name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
+                  {/* List Komentar */}
+                  {comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-3 group">
+                      <Link to={`/profile/${comment.user.username}`} className="flex-shrink-0 mt-1">
+                        <img
+                          src={comment.user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user.name)}&background=262626&color=ffffff`}
+                          alt={comment.user.username}
+                          className="w-8 h-8 rounded-full object-cover border border-neutral-200 dark:border-neutral-800"
+                        />
+                      </Link>
+                      <div className="flex-1 text-sm pt-0.5">
+                        <Link to={`/profile/${comment.user.username}`} className="font-semibold hover:underline mr-1.5">
+                          {comment.user.username}
+                        </Link>
+                        <span className="whitespace-pre-wrap text-neutral-800 dark:text-neutral-200">{comment.content}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {comments.length === 0 && !post.content && (
+                    <div className="h-full flex items-center justify-center text-center text-sm text-neutral-500">
+                      Belum ada komentar.<br/>Jadilah yang pertama!
+                    </div>
+                  )}
                 </div>
+
+                {/* Footer Kanan (Actions, Likes, Input Komentar) */}
+                <div className="border-t border-neutral-200 dark:border-neutral-800">
+                  {/* Action Icons */}
+                  <div className="p-3.5 flex flex-col gap-2">
+                    <div className="flex items-center gap-4">
+                      <button 
+                        onClick={handleToggleLike}
+                        className="hover:opacity-60 transition-opacity"
+                      >
+                        <Heart 
+                          size={26} 
+                          className={isLiked ? "fill-red-500 text-red-500" : "text-neutral-900 dark:text-neutral-100"} 
+                        />
+                      </button>
+                      <button className="hover:opacity-60 transition-opacity">
+                        <MessageCircle size={26} className="text-neutral-900 dark:text-neutral-100" />
+                      </button>
+                    </div>
+                    <div className="text-sm font-semibold mt-1">
+                      {likesCount} suka
+                    </div>
+                    <div className="text-[10px] text-neutral-500 uppercase tracking-wide">
+                      {new Date(post.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  </div>
+
+                  {/* Input Form Komentar */}
+                  <form 
+                    onSubmit={handlePostComment}
+                    className="flex items-center px-4 py-3 border-t border-neutral-200 dark:border-neutral-800 gap-2"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Tambahkan komentar..."
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      className="flex-1 bg-transparent text-sm outline-none placeholder-neutral-500 dark:text-neutral-100"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newComment.trim() || submittingComment}
+                      className="text-sm font-semibold text-[#0095f6] hover:text-[#1877f2] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Kirim
+                    </button>
+                  </form>
+                </div>
+
               </div>
-              <span className="text-[14px] font-semibold text-white">
-                {post.user.username}
-              </span>
-            </div>
-          </div>
-
-          {/* Image */}
-          {post.image_url && (
-            <div className="w-full aspect-square bg-[#0a0a0a] overflow-hidden">
-              <img
-                src={post.image_url}
-                alt={`Post oleh ${post.user.username}`}
-                className="w-full h-full object-cover"
-              />
             </div>
           )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-between px-3 pt-[8px] pb-[6px]">
-            <div className="flex items-center gap-[14px]">
-              <button
-                onClick={handleLike}
-                disabled={likeLoading}
-                aria-label="Suka"
-                className={`active:scale-90 transition-transform ${likeLoading ? "opacity-50" : ""}`}
-              >
-                <Heart
-                  size={26}
-                  strokeWidth={1.5}
-                  className={liked ? "text-[#ff3040]" : "text-white"}
-                  fill={liked ? "currentColor" : "none"}
-                />
-              </button>
-              <button
-                aria-label="Komentar"
-                className="text-white"
-                onClick={() => inputRef.current?.focus()}
-              >
-                <MessageCircle size={26} strokeWidth={1.5} style={{ transform: "scaleX(-1)" }} />
-              </button>
-              <button aria-label="Bagikan" className="text-white">
-                <Send size={26} strokeWidth={1.5} />
-              </button>
-            </div>
-            <button aria-label="Simpan" className="text-white">
-              <Bookmark size={26} strokeWidth={1.5} />
-            </button>
-          </div>
-
-          <p className="px-3 text-[14px] font-semibold text-white pb-[2px]">
-            {likesCount.toLocaleString("id-ID")} suka
-          </p>
-          <p className="px-3 text-[11px] text-[#737373] uppercase mb-2 tracking-wider">
-            {timeAgo(post.created_at)}
-          </p>
-
-          <p className="px-3 pb-2 text-[14px] text-[#f5f5f5]">
-            <span className="font-semibold text-white mr-1">{post.user.username}</span>
-            {post.content}
-          </p>
-
-          {/* Comments */}
-          <div className="border-t border-[#262626] px-3 py-3 mb-[110px]">
-            {rootComments.map((comment) => (
-              <div key={comment.id}>
-                <CommentItem
-                  id={comment.id}
-                  author={comment.user}
-                  content={comment.content}
-                  createdAt={comment.created_at}
-                  parentId={comment.parent_id}
-                  onReply={handleReply}
-                  onDelete={handleDeleteComment}
-                />
-                {replies
-                  .filter((r) => r.parent_id === comment.id)
-                  .map((reply) => (
-                    <CommentItem
-                      key={reply.id}
-                      id={reply.id}
-                      author={reply.user}
-                      content={reply.content}
-                      createdAt={reply.created_at}
-                      parentId={reply.parent_id}
-                      onReply={handleReply}
-                      onDelete={handleDeleteComment}
-                    />
-                  ))}
-              </div>
-            ))}
-          </div>
-
-          {/* Fixed Comment Input for Mobile */}
-          <div className="fixed bottom-[48px] left-0 right-0 bg-black border-t border-[#262626] z-40">
-            {replyUsername && (
-              <div className="px-4 py-2 text-xs text-[#737373] flex items-center justify-between bg-[#0d0d0d]">
-                <div>
-                  <span>Membalas </span>
-                  <span className="font-semibold text-white">@{replyUsername}</span>
-                </div>
-                <button
-                  onClick={() => { setReplyTo(null); setReplyUsername(null) }}
-                  className="text-white font-semibold text-[10px]"
-                >
-                  BATAL
-                </button>
-              </div>
-            )}
-            <div className="flex items-center gap-3 px-4 py-3 pb-[env(safe-area-inset-bottom)]">
-              <img
-                src={
-                  user?.avatar_url ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name ?? "U")}&size=64&background=262626&color=ffffff`
-                }
-                alt="avatar"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <input
-                ref={inputRef}
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmitComment()}
-                placeholder="Tambahkan komentar..."
-                disabled={submitting}
-                className="flex-1 text-[14px] text-white placeholder-[#6b6b6b] outline-none bg-transparent disabled:opacity-50"
-              />
-              {newComment.trim() && (
-                <button
-                  onClick={handleSubmitComment}
-                  disabled={submitting}
-                  className="text-[#0095f6] font-semibold text-[14px] disabled:opacity-50"
-                >
-                  {submitting ? "..." : "Kirim"}
-                </button>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     </div>

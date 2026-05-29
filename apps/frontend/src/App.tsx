@@ -7,7 +7,6 @@ import PostDetailPage from "./pages/PostDetailPage"
 import NotificationPage from "./pages/NotificationPage"
 import CreatePostPage from "./pages/CreatePostPage"
 import ProfilePage from "./pages/ProfilePage"
-import UserProfilePage from "./pages/UserProfilePage"
 import ProtectedRoute from "./components/ProtectedRoute"
 
 export default function App() {
@@ -52,6 +51,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        {/* Route Profil Diri Sendiri */}
         <Route
           path="/profile"
           element={
@@ -60,12 +60,12 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        {/* Alias: /profile/:username -> tampilkan ProfilePage untuk sementara */}
+        {/* Route Profil Pengguna Lain (Menggunakan Komponen yang Sama) */}
         <Route
           path="/profile/:username"
           element={
             <ProtectedRoute>
-              <UserProfilePage />
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

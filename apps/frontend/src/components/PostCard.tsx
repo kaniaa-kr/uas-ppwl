@@ -81,7 +81,7 @@ export default function PostCard({
   }
 
   return (
-    <article className="bg-black border-b border-[#262626] md:border md:border-[#262626] md:rounded-sm">
+    <article className="bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 md:border md:rounded-sm w-full max-w-[470px] mx-auto">
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-3 md:px-4 py-[10px] md:py-[12px]">
         <Link
@@ -90,7 +90,7 @@ export default function PostCard({
         >
           {/* Avatar with gradient ring */}
           <div className="flex-shrink-0 w-8 h-8 md:w-[42px] md:h-[42px] rounded-full p-[2px] bg-gradient-to-tr from-[#feda75] via-[#fa7e1e] to-[#d62976]">
-            <div className="w-full h-full rounded-full bg-black p-[1.5px]">
+            <div className="w-full h-full rounded-full bg-white dark:bg-black p-[1.5px]">
               <img
                 src={
                   user.avatar_url ||
@@ -102,7 +102,7 @@ export default function PostCard({
             </div>
           </div>
           <div className="min-w-0">
-            <p className="text-[14px] font-semibold text-white truncate leading-tight group-hover:text-[#a0a0a0] transition-colors">
+            <p className="text-[14px] font-semibold text-neutral-950 dark:text-neutral-50 truncate leading-tight group-hover:text-neutral-500 dark:group-hover:text-neutral-400 transition-colors">
               {user.username}
             </p>
           </div>
@@ -110,7 +110,7 @@ export default function PostCard({
 
         <div className="relative">
           <button
-            className="text-white hover:text-[#737373] transition-colors p-1 -mr-1"
+            className="text-neutral-950 dark:text-neutral-50 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors p-1 -mr-1"
             aria-label="Opsi lainnya"
             onClick={() => setShowMenu((v) => !v)}
           >
@@ -118,16 +118,16 @@ export default function PostCard({
           </button>
 
           {showMenu && isOwner && (
-            <div className="absolute right-0 top-8 bg-[#1a1a1a] border border-[#363636] rounded-xl shadow-xl z-10 min-w-[160px] overflow-hidden">
+            <div className="absolute right-0 top-8 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl z-10 min-w-[160px] overflow-hidden">
               <button
                 onClick={() => { setShowMenu(false); navigate(`/post/${id}`) }}
-                className="w-full text-left px-4 py-3 text-[14px] text-white hover:bg-[#262626] transition-colors"
+                className="w-full text-left px-4 py-3 text-[14px] text-neutral-800 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
               >
                 Lihat Detail
               </button>
               <button
                 onClick={handleDelete}
-                className="w-full text-left px-4 py-3 text-[14px] text-[#ff3040] flex items-center gap-2 hover:bg-[#262626] transition-colors border-t border-[#363636]"
+                className="w-full text-left px-4 py-3 text-[14px] text-red-600 dark:text-red-400 flex items-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors border-t border-neutral-100 dark:border-neutral-800"
               >
                 <Trash2 size={14} />
                 Hapus Postingan
@@ -136,10 +136,10 @@ export default function PostCard({
           )}
 
           {showMenu && !isOwner && (
-            <div className="absolute right-0 top-8 bg-[#1a1a1a] border border-[#363636] rounded-xl shadow-xl z-10 min-w-[160px] overflow-hidden">
+            <div className="absolute right-0 top-8 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl z-10 min-w-[160px] overflow-hidden">
               <button
                 onClick={() => { setShowMenu(false); navigate(`/post/${id}`) }}
-                className="w-full text-left px-4 py-3 text-[14px] text-white hover:bg-[#262626] transition-colors"
+                className="w-full text-left px-4 py-3 text-[14px] text-neutral-800 dark:text-neutral-100 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
               >
                 Lihat Detail
               </button>
@@ -155,7 +155,7 @@ export default function PostCard({
 
       {/* ── Image ── */}
       {image_url && (
-        <div className="w-full aspect-square overflow-hidden bg-[#0a0a0a]">
+        <div className="w-full aspect-square overflow-hidden bg-neutral-50 dark:bg-neutral-950 border-y border-neutral-100/50 dark:border-transparent">
           <img
             src={image_url}
             alt={`Post oleh ${user.username}`}
@@ -176,7 +176,7 @@ export default function PostCard({
             <Heart
               size={24}
               strokeWidth={1.5}
-              className={liked ? "text-[#ff3040]" : "text-white hover:text-[#737373]"}
+              className={liked ? "text-[#ff3040]" : "text-neutral-950 dark:text-neutral-50 hover:text-neutral-500 dark:hover:text-neutral-400"}
               fill={liked ? "currentColor" : "none"}
               style={{ transition: "fill 0.15s, color 0.15s" }}
             />
@@ -185,34 +185,34 @@ export default function PostCard({
           <Link
             to={`/post/${id}`}
             aria-label="Komentar"
-            className="text-white hover:text-[#737373] transition-colors"
+            className="text-neutral-950 dark:text-neutral-50 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors"
           >
             <MessageCircle size={24} strokeWidth={1.5} style={{ transform: "scaleX(-1)" }} />
           </Link>
 
-          <button aria-label="Bagikan" className="text-white hover:text-[#737373] transition-colors">
+          <button aria-label="Bagikan" className="text-neutral-950 dark:text-neutral-50 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors">
             <Send size={24} strokeWidth={1.5} />
           </button>
         </div>
 
-        <button aria-label="Simpan" className="text-white hover:text-[#737373] transition-colors">
+        <button aria-label="Simpan" className="text-neutral-950 dark:text-neutral-50 hover:text-neutral-500 dark:hover:text-neutral-400 transition-colors">
           <Bookmark size={24} strokeWidth={1.5} />
         </button>
       </div>
 
       {/* ── Likes count ── */}
       <div className="px-3 md:px-4 pt-[2px]">
-        <p className="text-[14px] font-semibold text-white leading-snug">
+        <p className="text-[14px] font-semibold text-neutral-950 dark:text-neutral-50 leading-snug">
           {likesCount.toLocaleString("id-ID")} suka
         </p>
       </div>
 
       {/* ── Caption ── */}
       <div className="px-3 md:px-4 pt-1 pb-4">
-        <p className="text-[14px] text-[#f5f5f5] leading-snug break-words">
+        <p className="text-[14px] text-neutral-800 dark:text-neutral-200 leading-snug break-words">
           <Link
             to={`/profile/${user.username}`}
-            className="font-semibold text-white mr-1 hover:text-[#a0a0a0]"
+            className="font-semibold text-neutral-950 dark:text-neutral-50 mr-1 hover:text-neutral-500 dark:hover:text-neutral-400"
           >
             {user.username}
           </Link>
@@ -221,7 +221,7 @@ export default function PostCard({
         {comments > 0 && (
           <Link
             to={`/post/${id}`}
-            className="block mt-1 text-[14px] text-[#737373] hover:text-[#a0a0a0] transition-colors"
+            className="block mt-1 text-[14px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors"
           >
             Lihat semua {comments} komentar
           </Link>

@@ -107,20 +107,20 @@ export default function CreatePostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-white dark:bg-black text-neutral-950 dark:text-neutral-50 transition-colors duration-200">
       <Navbar />
       <div className="md:ml-[72px] lg:ml-[244px] pt-[48px] md:pt-0 pb-[48px] md:pb-0">
 
         {/* Mobile Header */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-[60] bg-black border-b border-[#262626] h-[48px] flex items-center justify-between px-4">
-          <button onClick={() => navigate(-1)} className="text-white">
+        <div className="md:hidden fixed top-0 left-0 right-0 z-[60] bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 h-[48px] flex items-center justify-between px-4 transition-colors">
+          <button onClick={() => navigate(-1)} className="text-neutral-950 dark:text-neutral-50 hover:opacity-70 transition-opacity">
             <ArrowLeft size={24} strokeWidth={1.5} />
           </button>
-          <span className="text-[16px] font-semibold text-white">Postingan Baru</span>
+          <span className="text-[16px] font-semibold text-neutral-950 dark:text-neutral-50">Postingan Baru</span>
           <button
             onClick={handleSubmit}
             disabled={loading || !content.trim() || !imageUrl.trim()}
-            className="text-[#0095f6] font-semibold text-[14px] disabled:opacity-40"
+            className="text-[#0095f6] font-semibold text-[14px] disabled:opacity-40 transition-opacity"
           >
             {loading ? "..." : "Bagikan"}
           </button>
@@ -128,26 +128,26 @@ export default function CreatePostPage() {
 
         <div className="max-w-[600px] mx-auto px-4 py-6 md:py-10">
           <div className="hidden md:flex items-center justify-between mb-6">
-            <h1 className="text-[24px] font-bold text-white">Buat Postingan</h1>
+            <h1 className="text-[24px] font-bold text-neutral-950 dark:text-neutral-50">Buat Postingan</h1>
           </div>
 
-          <div className="bg-[#1a1a1a] border border-[#262626] rounded-sm overflow-hidden">
+          <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-sm overflow-hidden shadow-sm dark:shadow-none">
             {/* User info */}
-            <div className="flex items-center gap-3 px-4 py-4 border-b border-[#262626]">
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-neutral-200 dark:border-neutral-800">
               <img
                 src={
                   user?.avatar_url ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name ?? "U")}&size=64&background=262626&color=ffffff`
                 }
                 alt="avatar"
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 rounded-full object-cover border border-neutral-100 dark:border-neutral-800"
               />
-              <span className="text-[14px] font-semibold text-white">{user?.username}</span>
+              <span className="text-[14px] font-semibold text-neutral-950 dark:text-neutral-50">{user?.username}</span>
             </div>
 
             {/* Image preview */}
             {preview && (
-              <div className="relative w-full aspect-square bg-[#0a0a0a]">
+              <div className="relative w-full aspect-square bg-neutral-50 dark:bg-neutral-950">
                 <img
                   src={preview}
                   alt="preview"
@@ -159,7 +159,7 @@ export default function CreatePostPage() {
                 />
                 <button
                   onClick={handleClearImage}
-                  className="absolute top-3 right-3 bg-black/70 text-white rounded-full p-1.5 hover:bg-black transition"
+                  className="absolute top-3 right-3 bg-neutral-900/80 dark:bg-black/70 text-white rounded-full p-1.5 hover:bg-neutral-900 dark:hover:bg-black transition"
                 >
                   <X size={16} />
                 </button>
@@ -168,9 +168,9 @@ export default function CreatePostPage() {
 
             {/* Upload loading state */}
             {uploading && (
-              <div className="w-full aspect-square bg-[#0d0d0d] flex flex-col items-center justify-center gap-3">
-                <div className="w-8 h-8 rounded-full border-2 border-[#363636] border-t-[#0095f6] animate-spin" />
-                <span className="text-[13px] text-[#737373]">Mengupload gambar...</span>
+              <div className="w-full aspect-square bg-neutral-50 dark:bg-neutral-950 flex flex-col items-center justify-center gap-3">
+                <div className="w-8 h-8 rounded-full border-2 border-neutral-200 dark:border-neutral-800 border-t-[#0095f6] animate-spin" />
+                <span className="text-[13px] text-neutral-500 dark:text-neutral-400">Mengupload gambar...</span>
               </div>
             )}
 
@@ -182,16 +182,16 @@ export default function CreatePostPage() {
                 onChange={(e) => setContent(e.target.value)}
                 maxLength={2200}
                 rows={4}
-                className="w-full text-[14px] text-white placeholder-[#6b6b6b] outline-none resize-none bg-transparent leading-snug"
+                className="w-full text-[14px] text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none resize-none bg-transparent leading-snug"
               />
               <div className="flex justify-end">
-                <span className="text-[12px] text-[#4a4a4a]">{content.length}/2200</span>
+                <span className="text-[12px] text-neutral-400 dark:text-neutral-500">{content.length}/2200</span>
               </div>
             </div>
 
             {/* Image input options */}
             {!preview && !uploading && (
-              <div className="border-t border-[#262626] px-4 py-3 flex flex-col gap-2">
+              <div className="border-t border-neutral-200 dark:border-neutral-800 px-4 py-3 flex flex-col gap-2">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -201,18 +201,18 @@ export default function CreatePostPage() {
                 />
 
                 {inputMode === "none" && (
-                  <div className="flex gap-3">
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-2 text-[14px] text-[#737373] hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-[14px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors"
                     >
                       <Upload size={20} strokeWidth={1.5} />
                       <span>Upload dari perangkat</span>
                     </button>
-                    <span className="text-[#363636]">|</span>
+                    <span className="text-neutral-200 dark:text-neutral-800">|</span>
                     <button
                       onClick={() => setInputMode("url")}
-                      className="flex items-center gap-2 text-[14px] text-[#737373] hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-[14px] text-neutral-500 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors"
                     >
                       <ImageIcon size={20} strokeWidth={1.5} />
                       <span>Pakai URL</span>
@@ -227,12 +227,12 @@ export default function CreatePostPage() {
                       placeholder="Masukkan URL gambar..."
                       value={imageUrl}
                       onChange={(e) => handleImageUrlChange(e.target.value)}
-                      className="flex-1 text-[13px] text-white placeholder-[#6b6b6b] outline-none bg-[#121212] border border-[#363636] rounded-lg px-3 py-2"
+                      className="flex-1 text-[13px] bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 placeholder-neutral-400 dark:placeholder-neutral-500 outline-none border border-neutral-200 dark:border-neutral-800 rounded-lg px-3 py-2 focus:border-neutral-400 dark:focus:border-neutral-600 transition-colors"
                       autoFocus
                     />
                     <button
                       onClick={() => { setInputMode("none"); setImageUrl(""); setPreview("") }}
-                      className="text-[#737373] hover:text-white transition-colors"
+                      className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-50 transition-colors"
                     >
                       <X size={18} />
                     </button>
@@ -244,7 +244,7 @@ export default function CreatePostPage() {
             )}
 
             {/* Submit button desktop */}
-            <div className="hidden md:block border-t border-[#262626] px-4 py-4">
+            <div className="hidden md:block border-t border-neutral-200 dark:border-neutral-800 px-4 py-4">
               <button
                 onClick={handleSubmit}
                 disabled={loading || !content.trim() || !imageUrl.trim()}

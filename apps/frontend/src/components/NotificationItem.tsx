@@ -42,19 +42,11 @@ export default function NotificationItem({
   return (
     <div
       onClick={handleClick}
-      className={`flex items-center gap-3 px-3 py-3 cursor-pointer rounded-xl transition-colors hover:bg-[#1a1a1a] ${
-        !is_read ? "border-l-2 border-[#0095f6] pl-[10px]" : ""
-      }`}
+      className="flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/40 w-full"
     >
-      {/* Avatar */}
-      <div className="relative flex-shrink-0">
-        <div
-          onClick={(e) => {
-            e.stopPropagation()
-            navigate(`/profile/${actor.username}`)
-          }}
-          className="w-11 h-11 rounded-full overflow-hidden bg-[#262626] flex items-center justify-center cursor-pointer"
-        >
+      {/* Avatar Container */}
+      <div className="flex-shrink-0">
+        <div className="w-11 h-11 rounded-full overflow-hidden border border-neutral-200/70 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
           {actor.avatar_url ? (
             <img
               src={actor.avatar_url}
@@ -62,45 +54,51 @@ export default function NotificationItem({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-[13px] font-semibold text-[#a0a0a0]">
+            <span className="text-[13px] font-semibold text-neutral-400 dark:text-neutral-500">
               {initials}
             </span>
           )}
         </div>
       </div>
 
-      {/* Text */}
+      {/* Text Block Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] text-[#d4d4d4] leading-snug">
+        <p className="text-[13px] text-neutral-800 dark:text-neutral-200 leading-snug break-words">
           <span
             onClick={(e) => {
               e.stopPropagation()
               navigate(`/profile/${actor.username}`)
             }}
-            className="font-semibold text-white cursor-pointer hover:underline"
+            className="font-semibold text-neutral-950 dark:text-neutral-50 cursor-pointer hover:underline mr-1"
           >
             {actor.username}
-          </span>{" "}
+          </span>
           {message}{" "}
           {post && type === "comment" && (
-            <span className="text-[#737373]">
+            <span className="text-neutral-500 dark:text-neutral-400 font-normal italic">
               "{post.content.slice(0, 30)}…"{" "}
             </span>
           )}
-          <span className="text-[#737373] text-[12px]">{timeAgo(created_at)}</span>
+          <span className="text-neutral-400 dark:text-neutral-500 text-[12px] whitespace-nowrap ml-1">
+            {timeAgo(created_at)}
+          </span>
         </p>
       </div>
 
-      {/* Thumbnail or unread dot */}
-      {post?.image_url ? (
-        <img
-          src={post.image_url}
-          alt=""
-          className="w-11 h-11 object-cover flex-shrink-0 rounded-md cursor-pointer"
-        />
-      ) : !is_read ? (
-        <div className="w-2 h-2 rounded-full bg-[#0095f6] flex-shrink-0 ml-1" />
-      ) : null}
+      {/* Right Side: Thumbnail or Unread Dot Indicator */}
+      <div className="flex-shrink-0 flex items-center justify-center min-w-[24px]">
+        {post?.image_url ? (
+          <img
+            src={post.image_url}
+            alt=""
+            className="w-11 h-11 object-cover rounded border border-neutral-200/60 dark:border-neutral-800 cursor-pointer hover:opacity-90 transition-opacity"
+          />
+        ) : (
+          !is_read && (
+            <span className="w-2 h-2 bg-[#0095f6] rounded-full block animate-pulse" />
+          )
+        )}
+      </div>
     </div>
   )
 }

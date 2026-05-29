@@ -84,38 +84,40 @@ export default function NotificationPanel({ onClose }: Props) {
 
   return (
     <>
-      {/* Backdrop (mobile) */}
+      {/* Backdrop (mobile & desktop) */}
       <div
-        className="fixed inset-0 z-40 md:hidden"
+        className="fixed inset-0 z-40 bg-black/10 dark:bg-black/40 md:bg-transparent"
         onClick={onClose}
       />
 
       {/* Panel */}
-      <div className="fixed top-0 z-50 h-screen w-[calc(100vw-48px)] max-w-[380px] bg-[#000000] border-r border-[#262626] flex flex-col md:left-[72px] lg:left-[244px] left-0">
+      <div className="fixed top-0 z-50 h-screen w-[calc(100vw-48px)] max-w-[390px] bg-white dark:bg-black border-r border-neutral-200 dark:border-neutral-800 flex flex-col md:left-[72px] lg:left-[244px] left-0 shadow-2xl md:shadow-[10px_0_30px_rgba(0,0,0,0.04)] dark:md:shadow-none animate-in slide-in-from-left duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#262626]">
-          <h2 className="text-[18px] font-bold text-white">Notifikasi</h2>
+        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-100 dark:border-neutral-900">
+          <h2 className="text-[22px] font-bold text-neutral-950 dark:text-neutral-50 tracking-tight">
+            Notifikasi
+          </h2>
           <button
             onClick={onClose}
-            className="text-[#737373] hover:text-white transition-colors p-1 rounded-lg hover:bg-[#1a1a1a]"
+            className="text-neutral-400 dark:text-neutral-500 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors p-1.5 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-900"
           >
             <X size={20} />
           </button>
         </div>
 
         {/* List */}
-        <div className="overflow-y-auto flex-1 px-3 py-3">
+        <div className="overflow-y-auto flex-1 py-4">
           {groups.map((group) => {
             const items = notifications.filter(
               (n) => getGroup(n.created_at) === group
             )
             if (items.length === 0) return null
             return (
-              <div key={group} className="mb-5">
-                <h3 className="text-[11px] font-semibold text-[#737373] uppercase tracking-widest mb-2 px-2">
+              <div key={group} className="mb-6">
+                <h3 className="text-[12px] font-bold text-neutral-500 dark:text-neutral-400 tracking-wide mb-3 px-6">
                   {group}
                 </h3>
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col">
                   {items.map((notif) => (
                     <NotificationItem
                       key={notif.id}

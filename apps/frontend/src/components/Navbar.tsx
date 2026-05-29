@@ -41,66 +41,65 @@ export default function Navbar() {
   return (
     <>
       {/* ── MOBILE TOP BAR ─────────────────────────────────────── */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-[#262626] h-[48px] flex items-center justify-between px-4">
-        {/* Logo */}
-        <span
-          className="text-white text-[28px] leading-none select-none"
-          style={{ fontFamily: "Billabong, 'Grand Hotel', cursive", fontStyle: "italic" }}
-        >
-          Insuta
-        </span>
-
-        {/* Right icons */}
+      <header className="md:hidden fixed top-0 left-0 right-0 h-[60px] bg-white dark:bg-black border-b border-neutral-200 dark:border-neutral-800 px-4 flex items-center justify-between z-40 select-none">
+        <Link to="/" className="font-serif text-xl font-bold tracking-wider text-neutral-900 dark:text-neutral-50 hover:opacity-90">
+          Instagram
+        </Link>
         <div className="flex items-center gap-4">
-          {/* Bell */}
-          <button
-            className="relative text-white"
-            onClick={() => setShowNotifPanel((v) => !v)}
-            aria-label="Notifikasi"
+          <Link
+            to="/messages"
+            className={`p-1 relative transition-colors ${
+              isActive("/messages")
+                ? "text-neutral-950 dark:text-neutral-50"
+                : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            }`}
           >
-            <Bell size={24} strokeWidth={1.5} />
+            <MessageCircle size={24} strokeWidth={isActive("/messages") ? 2.5 : 1.5} />
+          </Link>
+          <button
+            onClick={() => setShowNotifPanel(!showNotifPanel)}
+            className={`p-1 relative transition-colors ${
+              showNotifPanel || isActive("/notifications")
+                ? "text-neutral-950 dark:text-neutral-50"
+                : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+            }`}
+          >
+            <Bell size={24} strokeWidth={showNotifPanel ? 2.5 : 1.5} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#ff3040] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-black animate-pulse" />
             )}
-          </button>
-
-          {/* DM */}
-          <button className="text-white" aria-label="Pesan">
-            <MessageCircle size={24} strokeWidth={1.5} />
           </button>
         </div>
       </header>
 
-      {/* ── MOBILE BOTTOM NAV ──────────────────────────────────── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-[#262626] h-[48px] flex items-center">
-        {navItems.map(({ path, icon: Icon, label }) => (
-          <Link
-            key={path}
-            to={path}
-            aria-label={label}
-            className={`flex-1 flex items-center justify-center h-full transition-colors ${
-              isActive(path) ? "text-white" : "text-[#737373]"
-            }`}
-          >
-            <Icon
-              size={path === "/create" ? 28 : 24}
-              strokeWidth={isActive(path) ? 2.5 : 1.5}
-              fill={isActive(path) && path === "/" ? "currentColor" : "none"}
-            />
-          </Link>
-        ))}
-
-        {/* Profile avatar */}
+      {/* ── MOBILE BOTTOM NAVIGATION ──────────────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-[52px] bg-white dark:bg-black border-t border-neutral-200 dark:border-neutral-800 px-6 flex items-center justify-between z-40 pb-[env(safe-area-inset-bottom)] select-none">
+        {navItems.map((item) => {
+          const IconComponent = item.icon
+          const active = isActive(item.path)
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`p-2 transition-transform active:scale-90 ${
+                active
+                  ? "text-neutral-950 dark:text-neutral-50"
+                  : "text-neutral-500 dark:text-neutral-400"
+              }`}
+            >
+              <IconComponent size={24} strokeWidth={active ? 2.5 : 1.5} />
+            </Link>
+          )
+        })}
         <Link
           to="/profile"
-          aria-label="Profil"
-          className={`flex-1 flex items-center justify-center h-full`}
+          className="p-1 transition-transform active:scale-90"
         >
           <div
-            className={`w-6 h-6 rounded-full overflow-hidden border-2 transition-colors ${
-              isActive("/profile") ? "border-white" : "border-[#737373]"
+            className={`w-[26px] h-[26px] rounded-full overflow-hidden border transition-colors ${
+              isActive("/profile")
+                ? "border-neutral-950 dark:border-neutral-50 ring-1 ring-neutral-950 dark:ring-neutral-50"
+                : "border-neutral-200 dark:border-neutral-800"
             }`}
           >
             <img
@@ -108,96 +107,101 @@ export default function Navbar() {
                 user?.avatar_url ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
                   user?.name ?? "U"
-                )}&size=64&background=363636&color=ffffff`
+                )}&size=64&background=e0e0e0&color=757575`
               }
-              alt="profil"
+              alt="avatar"
               className="w-full h-full object-cover"
             />
           </div>
         </Link>
       </nav>
 
-      {/* ── DESKTOP LEFT SIDEBAR ───────────────────────────────── */}
-      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen bg-black border-r border-[#262626] z-50 w-[72px] lg:w-[244px] py-6 px-3 transition-all duration-200">
-        {/* Logo */}
-        <div className="mb-8 px-2 h-[32px] flex items-center overflow-hidden">
-          {/* Collapsed: camera icon */}
-          <span className="lg:hidden text-white">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <rect x="2" y="7" width="20" height="14" rx="3"/>
-              <circle cx="12" cy="14" r="3"/>
-              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            </svg>
-          </span>
-          {/* Expanded: wordmark */}
-          <span
-            className="hidden lg:block text-white text-[26px] leading-none select-none whitespace-nowrap"
-            style={{ fontFamily: "Billabong, 'Grand Hotel', cursive", fontStyle: "italic" }}
-          >
-            Insuta
-          </span>
+      {/* ── DESKTOP & TABLET SIDEBAR ─────────────────────────────── */}
+      <aside className="hidden md:flex fixed top-0 bottom-0 left-0 z-40 bg-white dark:bg-black border-r border-neutral-200 dark:border-neutral-800 flex-col py-8 px-3 transition-all duration-300 md:w-[72px] lg:w-[244px] select-none">
+        {/* Logo Section */}
+        <div className="px-3 mb-10 h-10 flex items-center">
+          <Link to="/" className="w-full">
+            {/* Logo Text (Visible on big screens) */}
+            <span className="hidden lg:block font-serif text-2xl font-bold tracking-wider text-neutral-900 dark:text-neutral-50">
+              Instagram
+            </span>
+            {/* Minimalist Camera Icon alternative / dot for small layout responsive */}
+            <span className="block lg:hidden text-xl font-bold text-neutral-900 dark:text-neutral-50 text-center mx-auto">
+              IG
+            </span>
+          </Link>
         </div>
 
-        {/* Nav items */}
-        <nav className="flex flex-col gap-1 flex-1">
-          {navItems.map(({ path, icon: Icon, label }) => (
-            <Link
-              key={path}
-              to={path}
-              className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors group ${
-                isActive(path)
-                  ? "text-white"
-                  : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
-              }`}
-            >
-              <Icon
-                size={24}
-                strokeWidth={isActive(path) ? 2.5 : 1.5}
-                fill={isActive(path) && path === "/" ? "currentColor" : "none"}
-                className="flex-shrink-0"
-              />
-              <span className="hidden lg:block text-[15px] font-medium leading-none">
-                {label}
-              </span>
-            </Link>
-          ))}
+        {/* Navigation Items */}
+        <div className="flex-1 flex flex-col gap-2">
+          {navItems.map((item) => {
+            const IconComponent = item.icon
+            const active = isActive(item.path)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group active:scale-95 ${
+                  active
+                    ? "font-bold text-neutral-950 dark:text-neutral-50 bg-neutral-50 dark:bg-neutral-900/50"
+                    : "font-normal text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
+                }`}
+              >
+                <IconComponent
+                  size={24}
+                  strokeWidth={active ? 2.5 : 1.5}
+                  className="flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
+                />
+                <span className="hidden lg:block text-[15px] tracking-wide leading-none">
+                  {item.label}
+                </span>
+              </Link>
+            )
+          })}
 
-          {/* Notifications */}
+          {/* Notifikasi (Dengan panel toggle samping) */}
           <button
-            onClick={() => setShowNotifPanel((v) => !v)}
-            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors w-full ${
+            onClick={() => setShowNotifPanel(!showNotifPanel)}
+            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 text-left group active:scale-95 ${
               showNotifPanel
-                ? "text-white"
-                : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
+                ? "font-bold text-neutral-950 dark:text-neutral-50 bg-neutral-50 dark:bg-neutral-900/50"
+                : "font-normal text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
             }`}
           >
             <div className="relative flex-shrink-0">
-              <Bell size={24} strokeWidth={showNotifPanel ? 2.5 : 1.5} />
+              <Bell
+                size={24}
+                strokeWidth={showNotifPanel ? 2.5 : 1.5}
+                className="group-hover:scale-105 transition-transform duration-200"
+              />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#ff3040] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
+                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white dark:ring-black" />
               )}
             </div>
-            <span className="hidden lg:block text-[15px] font-medium leading-none">
+            <span className="hidden lg:block text-[15px] tracking-wide leading-none flex-1">
               Notifikasi
             </span>
+            {unreadCount > 0 && (
+              <span className="hidden lg:flex w-5 h-5 bg-red-500 text-white text-[11px] font-bold rounded-full items-center justify-center scale-90">
+                {unreadCount}
+              </span>
+            )}
           </button>
-        </nav>
 
-        {/* Profile + Logout */}
-        <div className="flex flex-col gap-1 mt-4">
+          {/* Profil */}
           <Link
             to="/profile"
-            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors ${
+            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-all duration-200 group active:scale-95 ${
               isActive("/profile")
-                ? "text-white"
-                : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
+                ? "font-bold text-neutral-950 dark:text-neutral-50 bg-neutral-50 dark:bg-neutral-900/50"
+                : "font-normal text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-900"
             }`}
           >
             <div
-              className={`w-6 h-6 rounded-full overflow-hidden border-2 flex-shrink-0 transition-colors ${
-                isActive("/profile") ? "border-white" : "border-[#737373]"
+              className={`w-6 h-6 rounded-full overflow-hidden border flex-shrink-0 transition-colors ${
+                isActive("/profile")
+                  ? "border-neutral-950 dark:border-neutral-50 ring-1 ring-neutral-950 dark:ring-neutral-50"
+                  : "border-neutral-300 dark:border-neutral-700"
               }`}
             >
               <img
@@ -205,30 +209,31 @@ export default function Navbar() {
                   user?.avatar_url ||
                   `https://ui-avatars.com/api/?name=${encodeURIComponent(
                     user?.name ?? "U"
-                  )}&size=64&background=363636&color=ffffff`
+                  )}&size=64&background=e0e0e0&color=757575`
                 }
                 alt="profil"
                 className="w-full h-full object-cover"
               />
             </div>
-            <span className="hidden lg:block text-[15px] font-medium leading-none">
+            <span className="hidden lg:block text-[15px] tracking-wide leading-none">
               Profil
             </span>
           </Link>
 
+          {/* Keluar / Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-4 px-3 py-3 rounded-xl text-[#737373] hover:text-white hover:bg-[#1a1a1a] transition-colors w-full"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-neutral-500 dark:text-neutral-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-all duration-200 w-full text-left active:scale-95 mt-auto"
           >
             <LogOut size={24} strokeWidth={1.5} className="flex-shrink-0" />
-            <span className="hidden lg:block text-[15px] font-medium leading-none">
+            <span className="hidden lg:block text-[15px] font-medium tracking-wide leading-none">
               Keluar
             </span>
           </button>
         </div>
       </aside>
 
-      {/* Notification Panel */}
+      {/* Notification Panel Container */}
       {showNotifPanel && (
         <NotificationPanel onClose={() => setShowNotifPanel(false)} />
       )}
