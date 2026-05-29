@@ -2,8 +2,9 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma-pg"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
@@ -55,16 +56,20 @@ model Comment {
   id         BigInt   @id @default(autoincrement())
   post_id    BigInt
   user_id    BigInt
+  parent_id  BigInt?                          // ← TAMBAH INI
   content    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   post          Post           @relation(fields: [post_id], references: [id], onDelete: Cascade)
   user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  parent        Comment?       @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: SetNull)
+  replies       Comment[]      @relation("CommentReplies")
   notifications Notification[]
 
   @@index([post_id])
   @@index([user_id])
+  @@index([parent_id])
 }
 
 // ============= POST_LIKE TABLE =============

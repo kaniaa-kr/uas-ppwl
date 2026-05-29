@@ -1,80 +1,99 @@
 import { createApp } from "./index";
-import { loadConfig } from "./config";       // SSM loader
-import { getPrisma } from "../prisma/dbPostgres"; // PostgreSQL
+import { loadConfig } from "./config";       
+import { getPrisma } from "../prisma/dbPostgres"; 
 
+// 🌟 OPTIMASI COLD START: Simpan state di luar handler
 let app: ReturnType<typeof createApp>;
+let isConfigLoaded = false;
 
 export const handler = async (event: any) => {
-  // DEBUG: log seluruh event untuk lihat apakah OPTIONS masuk
-  console.log("[EVENT] method:", event.requestContext?.http?.method);
-  console.log("[EVENT] path:", event.rawPath);
-  console.log("[EVENT] headers:", JSON.stringify(event.headers));
+  try {
+    // 1. EKSTRAKSI AMAN (Mencegah TypeError jika AWS mengubah format struktur root event)
+    const method = event.requestContext?.http?.method || event.httpMethod || "GET";
+    const rawPath = event.rawPath || event.path || "/";
+    const rawQueryString = event.rawQueryString ? `?${event.rawQueryString}` : "";
+    
+    // DEBUG: Logging esensial saja agar CloudWatch tidak bengkak
+    console.log(`[REQUEST] ${method} ${rawPath}`);
 
-  await loadConfig(); // load SSM sekali, lalu di-cache
+    // 2. LOAD CONFIG SEKALI SAJA (Idempotent)
+    if (!isConfigLoaded) {
+      await loadConfig();
+      isConfigLoaded = true;
+    }
 
-  if (!app) {
-    app = createApp(getPrisma); // buat app setelah env ready
-  }
+    // 3. INISIALISASI APP (Hanya jika belum ada)
+    if (!app) {
+      app = createApp();
+    }
 
-  // DEBUG ENV
-  console.log("[DATABASE_URL]:", process.env.DATABASE_URL);
-  console.log("[FRONTEND_URL] env:", process.env.FRONTEND_URL);
-  console.log("[API_KEY] env:", process.env.API_KEY);
-  console.log("[JWT_SECRET] env:", process.env.JWT_SECRET);
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-  const frontendUrl = process.env.FRONTEND_URL ?? "http://localhost:5173";
+    // 4. MANUAL CORS INTERCEPTOR UNTUK PREFLIGHT
+    if (method === "OPTIONS") {
+      return {
+        statusCode: 204,
+        headers: {
+          "Access-Control-Allow-Origin": frontendUrl,
+          "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+          "Access-Control-Allow-Credentials": "true",
+          "Access-Control-Max-Age": "86400", // Cache preflight selama 24 jam di browser
+        },
+        body: "",
+      };
+    }
 
-  // Handle preflight OPTIONS langsung di handler — sebelum masuk Elysia
-  // Lambda URL CORS config tidak reliable, jadi kita handle manual
-  if (event.requestContext.http.method === "OPTIONS") {
-    console.log("[OPTIONS] preflight handled for:", event.rawPath);
+    // 5. REKONSTRUKSI URL DENGAN FALLBACK
+    // (Header Host kadang ditulis huruf besar/kecil oleh AWS/CloudFront)
+    const host = event.headers?.host || event.headers?.Host || "localhost";
+    const url = `https://${host}${rawPath}${rawQueryString}`;
+
+    // 6. VALIDASI STRICT FETCH API (GET/HEAD pantang memiliki body)
+    const isBodyAllowed = !["GET", "HEAD"].includes(method);
+    let requestBody: string | Buffer | undefined = undefined;
+
+    if (isBodyAllowed && event.body) {
+      requestBody = event.isBase64Encoded 
+        ? Buffer.from(event.body, "base64") 
+        : event.body;
+    }
+
+    // 7. JALANKAN ELYSIA
+    const request = new Request(url, {
+      method: method,
+      headers: new Headers(event.headers as Record<string, string>),
+      body: requestBody,
+    });
+
+    const response = await app.handle(request);
+
+    // 8. INJECT CORS KE RESPONSE UTAMA 
+    // (Menggunakan .entries() untuk memastikan format header terbaca aman)
+    const finalHeaders = Object.fromEntries(response.headers.entries());
+    finalHeaders["Access-Control-Allow-Origin"] = frontendUrl;
+    finalHeaders["Access-Control-Allow-Credentials"] = "true";
+
     return {
-      statusCode: 204,
-      headers: {
-        "Access-Control-Allow-Origin": frontendUrl,
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
-        "Access-Control-Max-Age": "86400",
+      statusCode: response.status,
+      headers: finalHeaders,
+      body: await response.text(),
+      isBase64Encoded: false,
+    };
+
+  } catch (error: any) {
+    // 9. JARING PENGAMAN TERAKHIR
+    console.error("[FATAL ERROR] Handler jebol:", error);
+    return {
+      statusCode: 500,
+      headers: { 
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": process.env.FRONTEND_URL || "*" // Pastikan error tetap bisa dibaca frontend
       },
-      body: "",
+      body: JSON.stringify({
+        error: "Internal Server Error Lambda Wrapper",
+        message: error.message
+      })
     };
   }
-
-  const url = `https://${event.headers.host}${event.rawPath}${event.rawQueryString ? "?" + event.rawQueryString : ""
-    }`;
-
-  const response = await app.handle(
-    new Request(url, {
-      method: event.requestContext.http.method,
-      headers: event.headers,
-      body: event.body
-        ? Buffer.from(event.body, event.isBase64Encoded ? "base64" : "utf8")
-        : undefined,
-    })
-  );
-
-  // Inject CORS headers ke semua response dari Elysia
-  const resHeaders = Object.fromEntries(response.headers);
-
-  // DEBUG — log headers sebelum inject
-  console.log("[RESPONSE] status:", response.status);
-  console.log("[RESPONSE] headers before inject:", JSON.stringify(resHeaders));
-
-  resHeaders["Access-Control-Allow-Origin"] = frontendUrl;
-  resHeaders["Access-Control-Allow-Credentials"] = "true";
-
-  // DEBUG — log headers setelah inject  
-  console.log("[RESPONSE] headers after inject:", JSON.stringify(resHeaders));
-
-  return {
-    statusCode: response.status,
-    headers: {
-      ...Object.fromEntries(response.headers),
-      "Access-Control-Allow-Origin": frontendUrl,
-      "Access-Control-Allow-Credentials": "true",
-    },
-    body: await response.text(),
-    isBase64Encoded: false,
-  };
 };

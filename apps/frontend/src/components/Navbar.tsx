@@ -1,12 +1,28 @@
-import { Link, useNavigate, useLocation } from "react-router-dom"
+import { useState } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuthStore } from "../stores/auth.store"
-import { Bell, LogOut, Home, Search, PlusSquare, Compass, Film, MessageCircle } from "lucide-react"
+import { useNotificationStore } from "../stores/notification.store"
+import {
+  Home,
+  Search,
+  PlusSquare,
+  Bell,
+  MessageCircle,
+  LogOut,
+  Clapperboard,
+  // Menu,
+} from "lucide-react"
+import NotificationPanel from "./NotificationPanel"
 
 export default function Navbar() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
-  const navigate = useNavigate()
-  const location = useLocation()
+  const notifications = useNotificationStore((s) => s.notifications)
+  const unreadCount = notifications.filter((n) => !n.is_read).length
+
+  const [showNotifPanel, setShowNotifPanel] = useState(false)
 
   const handleLogout = () => {
     logout()
@@ -15,187 +31,207 @@ export default function Navbar() {
 
   const isActive = (path: string) => location.pathname === path
 
-  const desktopNavItems = [
-    { to: "/", icon: Home, label: "Beranda" },
-    { to: "/search", icon: Search, label: "Cari" },
-    { to: "/explore", icon: Compass, label: "Jelajahi" },
-    { to: "/reels", icon: Film, label: "Reels" },
-    { to: "/messages", icon: MessageCircle, label: "Pesan" },
-    { to: "/notifications", icon: Bell, label: "Notifikasi" },
-    { to: "/create", icon: PlusSquare, label: "Buat" },
+  const navItems = [
+    { path: "/", icon: Home, label: "Beranda" },
+    { path: "/search", icon: Search, label: "Cari" },
+    { path: "/create", icon: PlusSquare, label: "Buat" },
+    { path: "/reels", icon: Clapperboard, label: "Reels" },
   ]
-
-  const mobileBottomItems = [
-    { to: "/", icon: Home, label: "Beranda" },
-    { to: "/search", icon: Search, label: "Cari" },
-    { to: "/create", icon: PlusSquare, label: "Buat" },
-    { to: "/reels", icon: Film, label: "Reels" },
-  ]
-
-  const LogoText = (
-    <span
-      className="text-[#262626] select-none leading-none tracking-normal"
-      style={{
-        fontFamily: "Billabong, 'Grand Hotel', cursive, Georgia, serif",
-        fontStyle: "italic",
-        fontWeight: 500,
-        fontSize: "1.7rem",
-      }}
-    >
-      Instagram
-    </span>
-  )
 
   return (
     <>
-      {/* ═══ MOBILE: sticky top header ════════════════════════════════ */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-[#dbdbdb] h-[48px] flex items-center justify-between px-4">
-        {/* Logo wordmark */}
-        <Link to="/" className="flex items-center">
-          {LogoText}
-        </Link>
+      {/* ── MOBILE TOP BAR ─────────────────────────────────────── */}
+      <header className="md:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-[#262626] h-[48px] flex items-center justify-between px-4">
+        {/* Logo */}
+        <span
+          className="text-white text-[28px] leading-none select-none"
+          style={{ fontFamily: "Billabong, 'Grand Hotel', cursive", fontStyle: "italic" }}
+        >
+          Insuta
+        </span>
 
         {/* Right icons */}
-        <div className="flex items-center gap-5">
-          <Link
-            to="/notifications"
-            className="relative text-[#262626] hover:text-[#737373] transition-colors"
+        <div className="flex items-center gap-4">
+          {/* Bell */}
+          <button
+            className="relative text-white"
+            onClick={() => setShowNotifPanel((v) => !v)}
             aria-label="Notifikasi"
           >
-            <Bell size={24} strokeWidth={isActive("/notifications") ? 2.5 : 1.5} fill={isActive("/notifications") ? "currentColor" : "none"} />
-            <span className="absolute -top-[2px] -right-[2px] bg-[#ff3040] text-white text-[9px] font-bold w-[14px] h-[14px] rounded-full flex items-center justify-center leading-none">
-              3
-            </span>
-          </Link>
-          <Link
-            to="/messages"
-            className="text-[#262626] hover:text-[#737373] transition-colors"
-            aria-label="Pesan"
-          >
-            <MessageCircle size={24} strokeWidth={isActive("/messages") ? 2.5 : 1.5} fill={isActive("/messages") ? "currentColor" : "none"} />
-          </Link>
+            <Bell size={24} strokeWidth={1.5} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-[#ff3040] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+
+          {/* DM */}
+          <button className="text-white" aria-label="Pesan">
+            <MessageCircle size={24} strokeWidth={1.5} />
+          </button>
         </div>
       </header>
 
-      {/* ═══ MOBILE: bottom navigation bar ═══════════════════════════ */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-[#dbdbdb] flex items-center justify-around h-[48px] px-2 pb-[env(safe-area-inset-bottom)]">
-        {mobileBottomItems.map(({ to, icon: Icon, label }) => (
+      {/* ── MOBILE BOTTOM NAV ──────────────────────────────────── */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black border-t border-[#262626] h-[48px] flex items-center">
+        {navItems.map(({ path, icon: Icon, label }) => (
           <Link
-            key={to}
-            to={to}
+            key={path}
+            to={path}
             aria-label={label}
-            className="flex items-center justify-center w-10 h-10 transition-transform active:scale-95"
+            className={`flex-1 flex items-center justify-center h-full transition-colors ${
+              isActive(path) ? "text-white" : "text-[#737373]"
+            }`}
           >
             <Icon
-              size={24}
-              strokeWidth={isActive(to) ? 2.5 : 1.5}
-              fill={isActive(to) && to !== "/create" ? "currentColor" : "none"}
-              className="text-[#262626]"
+              size={path === "/create" ? 28 : 24}
+              strokeWidth={isActive(path) ? 2.5 : 1.5}
+              fill={isActive(path) && path === "/" ? "currentColor" : "none"}
             />
           </Link>
         ))}
-        {/* Profile avatar as last item */}
+
+        {/* Profile avatar */}
         <Link
           to="/profile"
           aria-label="Profil"
-          className="flex items-center justify-center w-10 h-10 transition-transform active:scale-95"
+          className={`flex-1 flex items-center justify-center h-full`}
         >
-          <img
-            src={
-              user?.avatar_url ||
-              `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name ?? "U")}&size=64&background=e0e0e0&color=757575`
-            }
-            alt="avatar"
-            className={`w-[24px] h-[24px] rounded-full object-cover ${
-              isActive("/profile") ? "ring-1 ring-[#262626] ring-offset-1" : ""
+          <div
+            className={`w-6 h-6 rounded-full overflow-hidden border-2 transition-colors ${
+              isActive("/profile") ? "border-white" : "border-[#737373]"
             }`}
-          />
+          >
+            <img
+              src={
+                user?.avatar_url ||
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  user?.name ?? "U"
+                )}&size=64&background=363636&color=ffffff`
+              }
+              alt="profil"
+              className="w-full h-full object-cover"
+            />
+          </div>
         </Link>
       </nav>
 
-      {/* ═══ DESKTOP: left sidebar ════════════════════════════════════ */}
-      <aside className="hidden md:flex flex-col fixed top-0 left-0 h-screen z-50 bg-white border-r border-[#dbdbdb] w-[72px] lg:w-[244px] pt-4 pb-5 px-3">
+      {/* ── DESKTOP LEFT SIDEBAR ───────────────────────────────── */}
+      <aside className="hidden md:flex flex-col fixed left-0 top-0 h-screen bg-black border-r border-[#262626] z-50 w-[72px] lg:w-[244px] py-6 px-3 transition-all duration-200">
         {/* Logo */}
-        <div className="px-3 pt-5 pb-7 mb-2 flex items-center">
-          <Link to="/" className="text-[#262626] hidden lg:block">
-            {LogoText}
-          </Link>
-          <Link to="/" className="text-[#262626] lg:hidden hover:scale-105 transition-transform mx-auto">
-             <div className="w-[24px] h-[24px] rounded-[5px] border-[1.5px] border-[#262626] flex items-center justify-center relative overflow-hidden">
-               <div className="w-[10px] h-[10px] rounded-full border-[1.5px] border-[#262626]"></div>
-               <div className="w-[3px] h-[3px] bg-[#262626] rounded-full absolute top-[3px] right-[3px]"></div>
-             </div>
-          </Link>
+        <div className="mb-8 px-2 h-[32px] flex items-center overflow-hidden">
+          {/* Collapsed: camera icon */}
+          <span className="lg:hidden text-white">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <rect x="2" y="7" width="20" height="14" rx="3"/>
+              <circle cx="12" cy="14" r="3"/>
+              <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+          </span>
+          {/* Expanded: wordmark */}
+          <span
+            className="hidden lg:block text-white text-[26px] leading-none select-none whitespace-nowrap"
+            style={{ fontFamily: "Billabong, 'Grand Hotel', cursive", fontStyle: "italic" }}
+          >
+            Insuta
+          </span>
         </div>
 
         {/* Nav items */}
         <nav className="flex flex-col gap-1 flex-1">
-          {desktopNavItems.map(({ to, icon: Icon, label }) => (
+          {navItems.map(({ path, icon: Icon, label }) => (
             <Link
-              key={to}
-              to={to}
-              className={`flex items-center gap-4 p-3 rounded-lg group transition-colors hover:bg-[#f2f2f2] ${
-                isActive(to) ? "font-bold text-[#262626]" : "text-[#262626]"
+              key={path}
+              to={path}
+              className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors group ${
+                isActive(path)
+                  ? "text-white"
+                  : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
               }`}
             >
-              {to === "/notifications" ? (
-                <div className="relative mx-auto lg:mx-0">
-                  <Icon
-                    size={24}
-                    strokeWidth={isActive(to) ? 2.5 : 1.5}
-                    fill={isActive(to) ? "currentColor" : "none"}
-                    className="group-hover:scale-105 transition-transform"
-                  />
-                  <span className="absolute -top-[2px] -right-[2px] bg-[#ff3040] text-white text-[9px] font-bold w-[14px] h-[14px] rounded-full flex items-center justify-center leading-none">
-                    3
-                  </span>
-                </div>
-              ) : (
-                <Icon
-                  size={24}
-                  strokeWidth={isActive(to) ? 2.5 : 1.5}
-                  fill={isActive(to) && to !== "/create" ? "currentColor" : "none"}
-                  className="mx-auto lg:mx-0 group-hover:scale-105 transition-transform"
-                />
-              )}
-              <span className="hidden lg:block text-[15px]">{label}</span>
+              <Icon
+                size={24}
+                strokeWidth={isActive(path) ? 2.5 : 1.5}
+                fill={isActive(path) && path === "/" ? "currentColor" : "none"}
+                className="flex-shrink-0"
+              />
+              <span className="hidden lg:block text-[15px] font-medium leading-none">
+                {label}
+              </span>
             </Link>
           ))}
 
-          {/* Profile */}
-          <Link
-            to="/profile"
-            className={`flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-[#f2f2f2] ${
-              isActive("/profile") ? "font-bold text-[#262626]" : "text-[#262626]"
+          {/* Notifications */}
+          <button
+            onClick={() => setShowNotifPanel((v) => !v)}
+            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors w-full ${
+              showNotifPanel
+                ? "text-white"
+                : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
             }`}
           >
-            <div className="mx-auto lg:mx-0">
+            <div className="relative flex-shrink-0">
+              <Bell size={24} strokeWidth={showNotifPanel ? 2.5 : 1.5} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#ff3040] text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </div>
+            <span className="hidden lg:block text-[15px] font-medium leading-none">
+              Notifikasi
+            </span>
+          </button>
+        </nav>
+
+        {/* Profile + Logout */}
+        <div className="flex flex-col gap-1 mt-4">
+          <Link
+            to="/profile"
+            className={`flex items-center gap-4 px-3 py-3 rounded-xl transition-colors ${
+              isActive("/profile")
+                ? "text-white"
+                : "text-[#737373] hover:text-white hover:bg-[#1a1a1a]"
+            }`}
+          >
+            <div
+              className={`w-6 h-6 rounded-full overflow-hidden border-2 flex-shrink-0 transition-colors ${
+                isActive("/profile") ? "border-white" : "border-[#737373]"
+              }`}
+            >
               <img
                 src={
                   user?.avatar_url ||
-                  `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name ?? "U")}&size=64&background=e0e0e0&color=757575`
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user?.name ?? "U"
+                  )}&size=64&background=363636&color=ffffff`
                 }
-                alt="avatar"
-                className={`w-[24px] h-[24px] rounded-full object-cover flex-shrink-0 group-hover:scale-105 transition-transform ${
-                  isActive("/profile") ? "ring-1 ring-[#262626] ring-offset-1" : ""
-                }`}
+                alt="profil"
+                className="w-full h-full object-cover"
               />
             </div>
-            <span className="hidden lg:block text-[15px]">Profil</span>
+            <span className="hidden lg:block text-[15px] font-medium leading-none">
+              Profil
+            </span>
           </Link>
-        </nav>
 
-        {/* More Options / Logout */}
-        <div className="mt-auto">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-[#f2f2f2] transition-colors text-[#262626] group"
+            className="flex items-center gap-4 px-3 py-3 rounded-xl text-[#737373] hover:text-white hover:bg-[#1a1a1a] transition-colors w-full"
           >
-            <LogOut size={24} strokeWidth={1.5} className="mx-auto lg:mx-0 group-hover:scale-105 transition-transform" />
-            <span className="hidden lg:block text-[15px]">Keluar</span>
+            <LogOut size={24} strokeWidth={1.5} className="flex-shrink-0" />
+            <span className="hidden lg:block text-[15px] font-medium leading-none">
+              Keluar
+            </span>
           </button>
         </div>
       </aside>
+
+      {/* Notification Panel */}
+      {showNotifPanel && (
+        <NotificationPanel onClose={() => setShowNotifPanel(false)} />
+      )}
     </>
   )
 }

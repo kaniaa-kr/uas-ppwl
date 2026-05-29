@@ -1,4 +1,5 @@
 import type { Notification } from "../stores/notification.store"
+import { useNavigate } from "react-router-dom"
 
 type Props = {
   notification: Notification
@@ -21,6 +22,13 @@ export default function NotificationItem({
   onMarkAsRead,
 }: Props) {
   const { id, type, actor, post, created_at, is_read } = notification
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    onMarkAsRead(id)
+    if (post?.id) navigate(`/post/${post.id}`)
+    else navigate(`/profile/${actor.username}`)
+  }
 
   const initials = actor.name
     ? actor.name.substring(0, 2).toUpperCase()
@@ -33,14 +41,20 @@ export default function NotificationItem({
 
   return (
     <div
-      onClick={() => onMarkAsRead(id)}
-      className={`flex items-center gap-[14px] px-2 py-3 cursor-pointer transition-colors hover:bg-[#fafafa] rounded-[8px] ${
-        !is_read ? "bg-white" : "bg-white"
+      onClick={handleClick}
+      className={`flex items-center gap-3 px-3 py-3 cursor-pointer rounded-xl transition-colors hover:bg-[#1a1a1a] ${
+        !is_read ? "border-l-2 border-[#0095f6] pl-[10px]" : ""
       }`}
     >
       {/* Avatar */}
       <div className="relative flex-shrink-0">
-        <div className="w-[44px] h-[44px] rounded-full overflow-hidden bg-[#e0e0e0] flex items-center justify-center cursor-pointer">
+        <div
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(`/profile/${actor.username}`)
+          }}
+          className="w-11 h-11 rounded-full overflow-hidden bg-[#262626] flex items-center justify-center cursor-pointer"
+        >
           {actor.avatar_url ? (
             <img
               src={actor.avatar_url}
@@ -48,32 +62,44 @@ export default function NotificationItem({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-[14px] font-semibold text-[#737373]">{initials}</span>
+            <span className="text-[13px] font-semibold text-[#a0a0a0]">
+              {initials}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Text Content */}
-      <div className="flex-1 text-left min-w-0 flex items-center flex-wrap gap-1">
-        <p className="text-[14px] text-[#262626] leading-snug">
-          <span className="font-semibold cursor-pointer">{actor.username}</span>{" "}
+      {/* Text */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] text-[#d4d4d4] leading-snug">
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/profile/${actor.username}`)
+            }}
+            className="font-semibold text-white cursor-pointer hover:underline"
+          >
+            {actor.username}
+          </span>{" "}
           {message}{" "}
           {post && type === "comment" && (
-            <span className="text-[#737373]">"{post.content.slice(0, 30)}…" </span>
+            <span className="text-[#737373]">
+              "{post.content.slice(0, 30)}…"{" "}
+            </span>
           )}
-          <span className="text-[14px] text-[#737373]">{timeAgo(created_at)}</span>
+          <span className="text-[#737373] text-[12px]">{timeAgo(created_at)}</span>
         </p>
       </div>
 
-      {/* Post thumbnail or unread dot */}
+      {/* Thumbnail or unread dot */}
       {post?.image_url ? (
         <img
           src={post.image_url}
           alt=""
-          className="w-[44px] h-[44px] object-cover flex-shrink-0 rounded-sm cursor-pointer"
+          className="w-11 h-11 object-cover flex-shrink-0 rounded-md cursor-pointer"
         />
       ) : !is_read ? (
-        <div className="w-2.5 h-2.5 rounded-full bg-[#0095f6] flex-shrink-0 ml-2" />
+        <div className="w-2 h-2 rounded-full bg-[#0095f6] flex-shrink-0 ml-1" />
       ) : null}
     </div>
   )

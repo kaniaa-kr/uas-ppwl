@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider   = "prisma-client-js"
+  output     = "../src/generated/prisma-pg"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============= USER TABLE =============
+model User {
+  id                BigInt    @id @default(autoincrement())
+  name              String
+  username          String    @unique
+  email             String    @unique
+  password          String? // NULL jika OAuth-only
+  avatar_url        String?
+  bio               String?
+  provider          String    @default("email") // "email" | "google"
+  provider_id       String? // ID dari Google OAuth
+  email_verified_at DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  // Relations
+  posts         Post[]
+  comments      Comment[]
+  likes         PostLike[]
+  notifications Notification[] @relation("receiver")
+  actions       Notification[] @relation("actor")
+}
+
+// ============= POST TABLE =============
+model Post {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt
+  content    String
+  image_url  String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  likes         PostLike[]
+  notifications Notification[]
+
+  @@index([user_id])
+}
+
+// ============= COMMENT TABLE =============
+model Comment {
+  id         BigInt   @id @default(autoincrement())
+  post_id    BigInt
+  user_id    BigInt
+  parent_id  BigInt? // ← TAMBAH INI
+  content    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  post          Post           @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  parent        Comment?       @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: SetNull)
+  replies       Comment[]      @relation("CommentReplies")
+  notifications Notification[]
+
+  @@index([post_id])
+  @@index([user_id])
+  @@index([parent_id])
+}
+
+// ============= POST_LIKE TABLE =============
+model PostLike {
+  id         BigInt   @id @default(autoincrement())
+  post_id    BigInt
+  user_id    BigInt
+  created_at DateTime @default(now())
+
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+  @@index([user_id])
+}
+
+// ============= NOTIFICATION TABLE =============
+model Notification {
+  id         BigInt   @id @default(autoincrement())
+  user_id    BigInt // Penerima notif
+  actor_id   BigInt // Pelaku aksi
+  type       String // "like" | "comment"
+  post_id    BigInt?
+  comment_id BigInt?
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user    User     @relation("receiver", fields: [user_id], references: [id], onDelete: Cascade)
+  actor   User     @relation("actor", fields: [actor_id], references: [id], onDelete: Cascade)
+  post    Post?    @relation(fields: [post_id], references: [id], onDelete: SetNull)
+  comment Comment? @relation(fields: [comment_id], references: [id], onDelete: SetNull)
+
+  @@index([user_id])
+  @@index([actor_id])
+}

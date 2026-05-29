@@ -67,7 +67,8 @@ type Props = {
 }
 
 export default function NotificationPanel({ onClose }: Props) {
-  const [notifications, setNotifications] = useState<Notification[]>(dummyNotifications)
+  const [notifications, setNotifications] =
+    useState<Notification[]>(dummyNotifications)
 
   const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
@@ -82,43 +83,52 @@ export default function NotificationPanel({ onClose }: Props) {
   ]
 
   return (
-    <div className="fixed top-0 left-64 h-screen w-96 bg-white border-l border-gray-200 z-30 flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Notifikasi</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 p-2 rounded-lg transition"
-        >
-          <X size={20} />
-        </button>
-      </div>
+    <>
+      {/* Backdrop (mobile) */}
+      <div
+        className="fixed inset-0 z-40 md:hidden"
+        onClick={onClose}
+      />
 
-      {/* List notifikasi */}
-      <div className="overflow-y-auto flex-1 px-3 py-4">
-        {groups.map((group) => {
-          const items = notifications.filter(
-            (n) => getGroup(n.created_at) === group
-          )
-          if (items.length === 0) return null
-          return (
-            <div key={group} className="mb-6">
-              <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3 px-2">
-                {group}
-              </h3>
-              <div className="flex flex-col gap-1">
-                {items.map((notif) => (
-                  <NotificationItem
-                    key={notif.id}
-                    notification={notif}
-                    onMarkAsRead={handleMarkAsRead}
-                  />
-                ))}
+      {/* Panel */}
+      <div className="fixed top-0 z-50 h-screen w-[calc(100vw-48px)] max-w-[380px] bg-[#000000] border-r border-[#262626] flex flex-col md:left-[72px] lg:left-[244px] left-0">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#262626]">
+          <h2 className="text-[18px] font-bold text-white">Notifikasi</h2>
+          <button
+            onClick={onClose}
+            className="text-[#737373] hover:text-white transition-colors p-1 rounded-lg hover:bg-[#1a1a1a]"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* List */}
+        <div className="overflow-y-auto flex-1 px-3 py-3">
+          {groups.map((group) => {
+            const items = notifications.filter(
+              (n) => getGroup(n.created_at) === group
+            )
+            if (items.length === 0) return null
+            return (
+              <div key={group} className="mb-5">
+                <h3 className="text-[11px] font-semibold text-[#737373] uppercase tracking-widest mb-2 px-2">
+                  {group}
+                </h3>
+                <div className="flex flex-col gap-0.5">
+                  {items.map((notif) => (
+                    <NotificationItem
+                      key={notif.id}
+                      notification={notif}
+                      onMarkAsRead={handleMarkAsRead}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
