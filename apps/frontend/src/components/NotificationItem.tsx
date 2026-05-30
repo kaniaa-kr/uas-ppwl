@@ -1,4 +1,5 @@
 import type { Notification } from "../stores/notification.store"
+import { useNavigate } from "react-router-dom"
 
 type Props = {
   notification: Notification
@@ -21,6 +22,13 @@ export default function NotificationItem({
   onMarkAsRead,
 }: Props) {
   const { id, type, actor, post, created_at, is_read } = notification
+  const navigate = useNavigate()
+
+  const handleClick = () => {
+    onMarkAsRead(id)
+    if (post?.id) navigate(`/post/${post.id}`)
+    else navigate(`/profile/${actor.username}`)
+  }
 
   const initials = actor.name
     ? actor.name.substring(0, 2).toUpperCase()
@@ -33,14 +41,12 @@ export default function NotificationItem({
 
   return (
     <div
-      onClick={() => onMarkAsRead(id)}
-      className={`flex items-center gap-[14px] px-2 py-3 cursor-pointer transition-colors hover:bg-[#fafafa] rounded-[8px] ${
-        !is_read ? "bg-white" : "bg-white"
-      }`}
+      onClick={handleClick}
+      className="flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900/40 w-full"
     >
-      {/* Avatar */}
-      <div className="relative flex-shrink-0">
-        <div className="w-[44px] h-[44px] rounded-full overflow-hidden bg-[#e0e0e0] flex items-center justify-center cursor-pointer">
+      {/* Avatar Container */}
+      <div className="flex-shrink-0">
+        <div className="w-11 h-11 rounded-full overflow-hidden border border-neutral-200/70 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center">
           {actor.avatar_url ? (
             <img
               src={actor.avatar_url}
@@ -48,33 +54,51 @@ export default function NotificationItem({
               className="w-full h-full object-cover"
             />
           ) : (
-            <span className="text-[14px] font-semibold text-[#737373]">{initials}</span>
+            <span className="text-[13px] font-semibold text-neutral-400 dark:text-neutral-500">
+              {initials}
+            </span>
           )}
         </div>
       </div>
 
-      {/* Text Content */}
-      <div className="flex-1 text-left min-w-0 flex items-center flex-wrap gap-1">
-        <p className="text-[14px] text-[#262626] leading-snug">
-          <span className="font-semibold cursor-pointer">{actor.username}</span>{" "}
+      {/* Text Block Content */}
+      <div className="flex-1 min-w-0">
+        <p className="text-[13px] text-neutral-800 dark:text-neutral-200 leading-snug break-words">
+          <span
+            onClick={(e) => {
+              e.stopPropagation()
+              navigate(`/profile/${actor.username}`)
+            }}
+            className="font-semibold text-neutral-950 dark:text-neutral-50 cursor-pointer hover:underline mr-1"
+          >
+            {actor.username}
+          </span>
           {message}{" "}
           {post && type === "comment" && (
-            <span className="text-[#737373]">"{post.content.slice(0, 30)}…" </span>
+            <span className="text-neutral-500 dark:text-neutral-400 font-normal italic">
+              "{post.content.slice(0, 30)}…"{" "}
+            </span>
           )}
-          <span className="text-[14px] text-[#737373]">{timeAgo(created_at)}</span>
+          <span className="text-neutral-400 dark:text-neutral-500 text-[12px] whitespace-nowrap ml-1">
+            {timeAgo(created_at)}
+          </span>
         </p>
       </div>
 
-      {/* Post thumbnail or unread dot */}
-      {post?.image_url ? (
-        <img
-          src={post.image_url}
-          alt=""
-          className="w-[44px] h-[44px] object-cover flex-shrink-0 rounded-sm cursor-pointer"
-        />
-      ) : !is_read ? (
-        <div className="w-2.5 h-2.5 rounded-full bg-[#0095f6] flex-shrink-0 ml-2" />
-      ) : null}
+      {/* Right Side: Thumbnail or Unread Dot Indicator */}
+      <div className="flex-shrink-0 flex items-center justify-center min-w-[24px]">
+        {post?.image_url ? (
+          <img
+            src={post.image_url}
+            alt=""
+            className="w-11 h-11 object-cover rounded border border-neutral-200/60 dark:border-neutral-800 cursor-pointer hover:opacity-90 transition-opacity"
+          />
+        ) : (
+          !is_read && (
+            <span className="w-2 h-2 bg-[#0095f6] rounded-full block animate-pulse" />
+          )
+        )}
+      </div>
     </div>
   )
 }
