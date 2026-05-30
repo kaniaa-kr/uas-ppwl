@@ -1,7 +1,7 @@
 import { useState } from "react"
+import { RefreshCw } from "lucide-react"
 import Navbar from "../components/Navbar"
 import NotificationItem from "../components/NotificationItem"
-import type { Notification } from "../stores/notification.store"
 import { useNotificationStore } from "../stores/notification.store"
 
 type FilterType = "semua" | "like" | "comment"
@@ -9,7 +9,6 @@ type FilterType = "semua" | "like" | "comment"
 function getGroup(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-
   if (days === 0) return "Hari Ini"
   if (days === 1) return "Kemarin"
   if (days <= 7) return "Minggu Ini"
@@ -22,6 +21,7 @@ export default function NotificationPage() {
   const markAsRead = useNotificationStore((s) => s.markAsRead)
 
   const [filter, setFilter] = useState<FilterType>("semua")
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   const filtered = notifications.filter((n) =>
     filter === "semua" ? true : n.type === filter
@@ -29,7 +29,6 @@ export default function NotificationPage() {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
-  // unique groups based on filtered
   const groups = Array.from(
     new Set(filtered.map((n) => getGroup(n.created_at)))
   )
@@ -38,20 +37,52 @@ export default function NotificationPage() {
     markAsRead(id)
   }
 
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    setTimeout(() => setIsRefreshing(false), 1000)
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
 
       <div className="md:ml-[72px] lg:ml-[244px] pt-[48px] md:pt-0 pb-[48px] md:pb-0 min-h-screen bg-white">
         <div className="max-w-[600px] mx-auto px-4 py-[16px] md:py-[32px]">
+
           {/* Header */}
-          <div className="flex items-center gap-[10px] mb-6">
-            <h1 className="text-[24px] font-bold text-[#262626]">Notifikasi</h1>
-            {unreadCount > 0 && (
-              <span className="bg-[#ff3040] text-white text-[12px] font-bold rounded-full px-[8px] py-[2px] leading-none">
-                {unreadCount}
-              </span>
-            )}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-[10px]">
+              <h1 className="text-[24px] font-bold text-[#262626]">Notifikasi</h1>
+              {unreadCount > 0 && (
+                <span className="bg-[#ff3040] text-white text-[12px] font-bold rounded-full px-[8px] py-[2px] leading-none">
+                  {unreadCount}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={handleRefresh}
+              className="flex items-center gap-1 text-[#0095f6] text-[14px] font-semibold hover:text-[#00376b] transition-colors"
+            >
+              <RefreshCw size={16} className={isRefreshing ? "animate-spin" : ""} />
+              Perbarui
+            </button>
+          </div>
+
+          {/* Filter Tabs */}
+          <div className="flex gap-2 mb-6">
+            {(["semua", "like", "comment"] as FilterType[]).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-4 py-1.5 rounded-full text-[13px] font-semibold border transition-colors ${
+                  filter === f
+                    ? "bg-[#262626] text-white border-[#262626]"
+                    : "bg-white text-[#262626] border-[#dbdbdb] hover:bg-[#fafafa]"
+                }`}
+              >
+                {f === "semua" ? "Semua" : f === "like" ? "Like" : "Komentar"}
+              </button>
+            ))}
           </div>
 
           {/* Grouped List */}
