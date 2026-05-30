@@ -6,3 +6,5 @@ Laporan Tugas Besar PPWL : [GDocs](https://docs.google.com/document/d/1L9Dt4WpMy
 Link Frontend: ([https://d18gryvg6s0jzo.cloudfront.net](https://d18gryvg6s0jzo.cloudfront.net)
 
 Link Backend: [(http://s3-instagram-clone-frontend.s3-website-us-east-1.amazonaws.com](https://7wzsqyfqotlwyyf7ydeaqjaw4i0clvgn.lambda-url.us-east-1.on.aws)
+
+Link yt : https://youtu.be/vU9kiocUFpQ?si=XgfjXUM-okN4cANu
