@@ -28,6 +28,7 @@ export default function LoginPage() {
       }
       const data = await res.json()
       setAuth(data.user, data.token)
+      toast.success(`Selamat Datang, ${data.user.name || data.user.username}! 👋`)
       navigate("/")
     } catch (error: any) {
       toast.error(error.message || "Gagal login")
